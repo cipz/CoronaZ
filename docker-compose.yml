@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+
+  coronaz-frontend:
+    build:
+      context: ./coronaz-frontend
+      dockerfile: Dockerfile
+    volumes:
+      - './coronaz-frontend:/app'
+      - '/app/node_modules'
+    ports:
+      - 3000:3000
