@@ -30,3 +30,5 @@ services:
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: pass
+    depends_on: 
+      - mongo
