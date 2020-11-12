@@ -9,4 +9,5 @@ producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
 for e in range(1000):
     data = {'number' : e}
     producer.send('numtest', value=data)
+    print("Sending", str(data))
     sleep(.5)

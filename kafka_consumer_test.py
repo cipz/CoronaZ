@@ -10,7 +10,7 @@ consumer = KafkaConsumer(
      group_id='my-group',
      value_deserializer=lambda x: loads(x.decode('utf-8')))
 
-client = MongoClient('localhost:27017')
+client = MongoClient('localhost:27017', username='admin', password='pass')
 collection = client.numtest.numtest
 
 for message in consumer:
