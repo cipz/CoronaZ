@@ -10,11 +10,11 @@ consumer = KafkaConsumer(
      group_id='my-group',
      value_deserializer=lambda x: loads(x.decode('utf-8')))
 
-# client = MongoClient('localhost:27017')
-# collection = client.numtest.numtest
+client = MongoClient('localhost:27017')
+collection = client.numtest.numtest
 
 for message in consumer:
     message = message.value
     print(message)
-    # collection.insert_one(message)
-    # print('{} added to {}'.format(message, collection))
+    collection.insert_one(message)
+    print('{} added to {}'.format(message, collection))
