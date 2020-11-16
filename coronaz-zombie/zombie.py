@@ -54,23 +54,23 @@ class Zombie:
     def move(self, direction):
         with self._lock:
             position = self.position
-            if direction[0] == 'n':
+            if direction == 0:
                 position[0] += 1
-            elif direction[0] == 'e':
+            elif direction == 1:
                 position[1] += 1
-            elif direction[0] == 's':
+            elif direction == 2:
                 position[0] -= 1
-            elif direction[0] == 'w':
+            elif direction == 3:
                 position[1] -= 1
             self.position = position
             self.has_moved = True
 
-    def get_new_server_message(self):
+    def get_next_server_message(self):
         with self._lock:
             self.has_new_contact = False
             return ServerMessage(self).get_json()
 
-    def get_new_broadcast_message(self):
+    def get_next_broadcast_message(self):
         with self._lock:
             self.has_moved = False
             return ZombieMessage(self).get_json()

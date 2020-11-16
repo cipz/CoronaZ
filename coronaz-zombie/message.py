@@ -1,8 +1,7 @@
 import json
-from zombie import Zombie
 
 class ZombieMessage:
-    def __init__(self, zombie: Zombie):
+    def __init__(self, zombie):
         self.message = dict()
         self.message['uuid'] = str(zombie.uuid)
         self.message['position'] = zombie.position

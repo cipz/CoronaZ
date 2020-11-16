@@ -1,22 +1,24 @@
 import logging
 import sys
 from threading import Thread, Event
+from random import randint
+import time
 
 from zombie import Zombie
-from message import ZombieMessage, ServerMessage
+
 
 
 def thread_zombie(kill, zombie):
     while not kill.wait(1):
         if zombie.has_moved:
-            logging.info("Broadcast to other zombies: %s" % zombie.get_new_broadcast_message())
+            logging.info("Broadcast to other zombies: %s" % zombie.get_next_broadcast_message())
     logging.info("zombie con ended")
 
 
 def thread_server_con(kill, zombie):
     while not kill.wait(1):
         if zombie.has_new_contact:
-            logging.info("Message to server: %s" % zombie.get_new_server_message())
+            logging.info("Message to server: %s" % zombie.get_next_server_message())
     logging.info("server con ended")
 
 
@@ -45,15 +47,21 @@ def main(argv):
     zombie_thread.start()
     server_con_thread.start()
 
+    directions = {'n': 0, 'e': 1, 's': 2, 'w': 3}
+
     while True:
-        command = input('What to do: [a]dd, [m]ove, [q]uit\n')
+        command = input('What to do: [a]dd, [m]ove, [s]imulate, [q]uit\n')
         try:
             if command[0].startswith('a'):
                 aid = input('id? ')
                 zombie.update_contacts(aid)
             elif command[0].startswith('m'):
                 direction = input('direction: [n]orth, [e]ast, [s]outh, [w]est? ')
-                zombie.move(direction)
+                zombie.move(directions[direction])
+            elif command[0].startswith('s'):
+                for i in range(25):
+                    zombie.move(randint(0, 4))
+                    time.sleep(1)
             else:
                 break
         except Exception as e:
