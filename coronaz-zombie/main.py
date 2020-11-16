@@ -3,6 +3,7 @@ import sys
 from threading import Thread, Event
 
 from zombie import Zombie
+from message import ZombieMessage, ServerMessage
 
 
 def thread_zombie(kill, zombie):
@@ -15,7 +16,7 @@ def thread_zombie(kill, zombie):
 def thread_server_con(kill, zombie):
     while not kill.wait(1):
         if zombie.has_new_contact:
-            logging.info("Message to server: %s" % zombie.get_new_contacts())
+            logging.info("Message to server: %s" % zombie.get_new_server_message())
     logging.info("server con ended")
 
 
@@ -23,7 +24,15 @@ threads = list()
 
 
 def main(argv):
-    zombie = Zombie()
+    logging.debug(argv)
+    field_size = (int(argv[1]), int(argv[2]))
+    position = (int(argv[3]), int(argv[4]))
+    if argv[5].lower() == 'false' or argv[5].lower() == '0':
+        infected = False
+    else:
+        infected = True
+    radius = int(argv[6])
+    zombie = Zombie(field_size, position, infected, radius)
 
     kill = Event()
 
@@ -38,25 +47,31 @@ def main(argv):
 
     while True:
         command = input('What to do: [a]dd, [m]ove, [q]uit\n')
-
-        if command[0].startswith('a'):
-            aid = input('id? ')
-            zombie.update_contacts(aid)
-        elif command[0].startswith('m'):
-            direction = input('direction: [n]orth, [e]ast, [s]outh, [w]est? ')
-            zombie.move(direction)
-        else:
-            break
+        try:
+            if command[0].startswith('a'):
+                aid = input('id? ')
+                zombie.update_contacts(aid)
+            elif command[0].startswith('m'):
+                direction = input('direction: [n]orth, [e]ast, [s]outh, [w]est? ')
+                zombie.move(direction)
+            else:
+                break
+        except Exception as e:
+            print(e)
 
     kill.set()
 
     zombie_thread.join()
     server_con_thread.join()
-    logging.info('programm ended')
+    logging.info('program ended')
 
 
 if __name__ == '__main__':
     logging.basicConfig(format="%(asctime)s: %(message)s",
-                        level=logging.INFO,
+                        level=logging.DEBUG,
                         datefmt="%H:%M:%S")
-    main(sys.argv)
+
+    if len(sys.argv) != 7:
+        print('usage: python %s field_size_x field_size_y position_x position_y infected radius' % sys.argv[0])
+    else:
+        main(sys.argv)

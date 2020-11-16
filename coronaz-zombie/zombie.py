@@ -1,13 +1,23 @@
 from threading import Lock
-
+import uuid
+import json
+from message import ZombieMessage, ServerMessage
 
 class Zombie:
-    def __init__(self):
+    def __init__(self, field_size, position, infected, radius):
+        self.uuid = uuid.uuid1()
+
         self.contacts = list()
+
         self._new_contact = False
         self._moved = False
         self._lock = Lock()
-        self._position = [50, 50]
+
+        self.field_size = field_size
+
+        self.position = list(position)
+
+        self.infected = infected
 
     @property
     def has_new_contact(self):
@@ -33,9 +43,12 @@ class Zombie:
     def position(self, new_pos):
         self._position = new_pos
 
-    def update_contacts(self, id):
+    def process_message(self, message):
+        pass
+
+    def update_contacts(self, contact):
         with self._lock:
-            self.contacts.append(id)
+            self.contacts.append(contact)
             self.has_new_contact = True
 
     def move(self, direction):
@@ -52,12 +65,12 @@ class Zombie:
             self.position = position
             self.has_moved = True
 
-    def get_new_contacts(self):
+    def get_new_server_message(self):
         with self._lock:
             self.has_new_contact = False
-            return str(self.contacts)
+            return ServerMessage(self).get_json()
 
     def get_new_broadcast_message(self):
         with self._lock:
             self.has_moved = False
-            return str(self._position)
+            return ZombieMessage(self).get_json()
