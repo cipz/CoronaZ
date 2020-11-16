@@ -1,42 +1,21 @@
-import sys
-from threading import Thread, Event, Lock
 import logging
+import sys
+from threading import Thread, Event
 
-
-class Zombie:
-    def __init__(self):
-        self.contacts = list()
-        self._changed = False
-        self._lock = Lock()
-
-    def update_contacts(self, id):
-        with self._lock:
-            self.contacts.append(id)
-            self._changed = True
-
-    def get_contacts(self):
-        with self._lock:
-            self._changed = False
-            return str(self.contacts)
+from zombie import Zombie
 
 
 def thread_zombie(kill, zombie):
-    for i in range(3):
-        command = input('What to do: [a]dd, [q]uit\n')
-
-        if command[0].startswith('a'):
-            aid = input('id? ')
-            zombie.update_contacts(aid)
-        else:
-            kill.set()
-            break
-    kill.set()
+    while not kill.wait(1):
+        if zombie.has_moved:
+            logging.info("Broadcast to other zombies: %s" % zombie.get_new_broadcast_message())
+    logging.info("zombie con ended")
 
 
 def thread_server_con(kill, zombie):
     while not kill.wait(1):
-        if zombie._changed:
-            print("Got new changes: %s" % zombie.get_contacts())
+        if zombie.has_new_contact:
+            logging.info("Message to server: %s" % zombie.get_new_contacts())
     logging.info("server con ended")
 
 
@@ -56,6 +35,20 @@ def main(argv):
 
     zombie_thread.start()
     server_con_thread.start()
+
+    while True:
+        command = input('What to do: [a]dd, [m]ove, [q]uit\n')
+
+        if command[0].startswith('a'):
+            aid = input('id? ')
+            zombie.update_contacts(aid)
+        elif command[0].startswith('m'):
+            direction = input('direction: [n]orth, [e]ast, [s]outh, [w]est? ')
+            zombie.move(direction)
+        else:
+            break
+
+    kill.set()
 
     zombie_thread.join()
     server_con_thread.join()
