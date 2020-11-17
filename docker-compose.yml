@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.5'
 
 services:
 
@@ -12,6 +12,51 @@ services:
     ports:
       - 3000:3000
 
+  zookeper:
+    image: confluentinc/cp-zookeeper
+    container_name: zookeper
+    hostname: zookerper
+    deploy:
+      restart_policy:
+          condition: always
+          delay: 5s
+    environment:
+      - 'ZOOKEEPER_CLIENT_PORT=2181'
+      - 'ZOOKEEPER_TICK_TIME=2000'
+      - 'ZOOKEEPER_SYNC_LIMIT=2'
+      - 'KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=16000'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 500k
+        max-file: "3"
+    ports: 
+      - 2181:2181 
+    network_mode: host
+
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: kafka
+    hostname: kafka
+    deploy:
+      restart_policy:
+          condition: always
+          delay: 5s
+    depends_on:
+      - zookeper
+    environment:
+      - 'KAFKA_ZOOKEEPER_CONNECT=localhost:2181'
+      - 'KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092'
+      - 'KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 500k
+        max-file: "3"
+    ports: 
+      - 9092:9092 
+    network_mode: host
+    
   mongo:
     image: mongo
     restart: always
