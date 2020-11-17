@@ -1,3 +1,4 @@
+import logging
 from threading import Lock
 import uuid
 import json
@@ -44,7 +45,8 @@ class Zombie:
         self._position = new_pos
 
     def process_message(self, message):
-        pass
+        m = json.loads(message)
+        logging.debug(m['uuid'])
 
     def update_contacts(self, contact):
         with self._lock:

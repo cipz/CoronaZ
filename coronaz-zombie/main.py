@@ -20,16 +20,24 @@ def thread_zombie_broadcast(kill, zombie, port):
             s.sendto(bytes(m, 'utf-8'), ('255.255.255.255', port))
 
             logging.info("Broadcast to other zombies: %s" % m)
+
+    s = soc.socket(soc.AF_INET, soc.SOCK_DGRAM)
+    s.setsockopt(soc.SOL_SOCKET, soc.SO_BROADCAST, 1)
+    s.sendto(b'stop', ('127.0.0.1', port))
+    logging.debug('Contacted zombie listener to stop')
+
     logging.info("zombie broadcast ended")
 
 def thread_zombie_listen(kill, zombie, port):
     while not kill.is_set():
         try:
             s = soc.socket(soc.AF_INET, soc.SOCK_DGRAM)
-            s.settimeout(1)
             s.bind(('', port))
             m = s.recvfrom(1024)
             logging.info('Got message: %s' % str(m))
+            if m[0] == b'stop':
+                break
+            zombie.process_message(m[0])
         except soc.timeout:
             pass
     logging.info("zombie listen ended")
