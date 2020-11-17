@@ -79,13 +79,12 @@ def main(args):
 
     directions = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 
+    ## TODO automatic modus
+
     while True:
-        command = input('What to do: [a]dd contact, [m]ove, [s]imulate, [q]uit\n')
+        command = input('What to do: [m]ove, [s]imulate, [q]uit\n')
         try:
-            if command[0].startswith('a'):
-                aid = input('id? ')
-                zombie.update_contacts(aid)
-            elif command[0].startswith('m'):
+            if command[0].startswith('m'):
                 direction = input('direction: [n]orth, [e]ast, [s]outh, [w]est? ')
                 zombie.move(directions[direction])
             elif command[0].startswith('s'):
@@ -106,7 +105,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format="%(asctime)s: %(message)s",
+    logging.basicConfig(#format="%(asctime)s: %(message)s",
                         level=logging.DEBUG,
                         datefmt="%H:%M:%S")
 
@@ -123,6 +122,8 @@ if __name__ == '__main__':
                         help='IP address and QUEUE of the main server')
     parser.add_argument('-z', '--zombie-port', type=int, metavar='PORT', default=4711,
                         help='Port on which the broadcast messages are send')
+    parser.add_argument('-a', '--automatic', action='store_true',
+                        help='if set the client will automatically move')
 
     args = parser.parse_args()
     logging.debug(vars(args))
