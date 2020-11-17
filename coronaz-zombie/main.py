@@ -82,11 +82,14 @@ def main(args):
     ## TODO automatic modus
 
     while True:
-        command = input('What to do: [m]ove, [s]imulate, [q]uit\n')
+        command = input('What to do: [c]ontact, [m]ove, [s]imulate, [q]uit\n')
         try:
             if command[0].startswith('m'):
                 direction = input('direction: [n]orth, [e]ast, [s]outh, [w]est? ')
                 zombie.move(directions[direction])
+            elif command[0].startswith('c'):
+                position = input('position [x,y]: ')
+                zombie.process_message('{"uuid": "test", "position": %s, "infected": false}' % position)
             elif command[0].startswith('s'):
                 for i in range(25):
                     zombie.move(randint(0, 4))

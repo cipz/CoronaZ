@@ -4,6 +4,7 @@ import uuid
 import json
 import math
 from message import ZombieMessage, ServerMessage
+from datetime import datetime
 
 class Zombie:
     def __init__(self, field_size, position, infected, radius):
