@@ -39,9 +39,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
 
 
 def main(args):
-    ## TODO finish parser
-
-    zombie = Zombie(args['field'], args['position'], False, args['radius'])
+    zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'])
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
@@ -92,8 +90,8 @@ if __name__ == '__main__':
                         help='field size in form: x y')
     parser.add_argument('-p', '--position', type=int, nargs=2, metavar=('X', 'Y'), default=[50,50],
                         help='starting position in form: x y')
-    #parser.add_argument('-i', '--infected')
-    parser.add_argument('-r', '--radius', type=int, nargs=1, metavar='X', default=10,
+    parser.add_argument('-i', '--infected', action='store_true')
+    parser.add_argument('-r', '--radius', type=int, metavar='X', default=10,
                         help='radius in which a contact is recognized')
     parser.add_argument('-s', '--server', type=str, nargs=2, metavar=('IP', 'QUEUE'), required=True,
                         help='IP address and QUEUE of the main server')
