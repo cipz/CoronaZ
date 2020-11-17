@@ -5,6 +5,7 @@ from random import randint
 from kafka import KafkaProducer
 from json import dumps
 import time
+import argparse
 
 from zombie import Zombie
 
@@ -21,7 +22,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
 
     # Comment for testing locally
     # producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-    #                      value_serializer=lambda x: 
+    #                      value_serializer=lambda x:
     #                      dumps(x).encode('utf-8'))
 
     while not kill.wait(1):
@@ -36,30 +37,20 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
     logging.info("server con ended")
 
 
-threads = list()
 
+def main(args):
+    ## TODO finish parser
 
-def main(argv):
-    logging.debug(argv)
-    field_size = (int(argv[1]), int(argv[2]))
-    position = (int(argv[3]), int(argv[4]))
-    if argv[5].lower() == 'false' or argv[5].lower() == '0':
-        infected = False
-    else:
-        infected = True
-    radius = int(argv[6])
-    zombie = Zombie(field_size, position, infected, radius)
+    zombie = Zombie(args['field'], args['position'], False, args['radius'])
 
-    mqtt_server_addr = argv[7]
-    mqtt_queue = argv[8]
+    mqtt_server_addr = args['server'][0]
+    mqtt_queue = args['server'][1]
 
     kill = Event()
 
     zombie_thread = Thread(target=thread_zombie, args=(kill, zombie))
-    threads.append(zombie_thread)
 
     server_con_thread = Thread(target=thread_server_con, args=(kill, zombie, mqtt_server_addr, mqtt_queue))
-    threads.append(server_con_thread)
 
     zombie_thread.start()
     server_con_thread.start()
@@ -67,7 +58,7 @@ def main(argv):
     directions = {'n': 0, 'e': 1, 's': 2, 'w': 3}
 
     while True:
-        command = input('What to do: [a]dd, [m]ove, [s]imulate, [q]uit\n')
+        command = input('What to do: [a]dd contact, [m]ove, [s]imulate, [q]uit\n')
         try:
             if command[0].startswith('a'):
                 aid = input('id? ')
@@ -96,7 +87,18 @@ if __name__ == '__main__':
                         level=logging.DEBUG,
                         datefmt="%H:%M:%S")
 
-    if len(sys.argv) != 9:
-        print('usage: python %s field_size_x field_size_y position_x position_y infected radius mqtt_server_addr mqtt_queue' % sys.argv[0])
-    else:
-        main(sys.argv)
+    parser = argparse.ArgumentParser("main.py")
+    parser.add_argument('-f', '--field', type=int, nargs=2, metavar=('X', 'Y'), default=[100,100],
+                        help='field size in form: x y')
+    parser.add_argument('-p', '--position', type=int, nargs=2, metavar=('X', 'Y'), default=[50,50],
+                        help='starting position in form: x y')
+    #parser.add_argument('-i', '--infected')
+    parser.add_argument('-r', '--radius', type=int, nargs=1, metavar='X', default=10,
+                        help='radius in which a contact is recognized')
+    parser.add_argument('-s', '--server', type=str, nargs=2, metavar=('IP', 'QUEUE'), required=True,
+                        help='IP address and QUEUE of the main server')
+
+    args = parser.parse_args()
+    logging.debug(args)
+
+    main(vars(args))

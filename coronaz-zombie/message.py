@@ -1,5 +1,9 @@
 import json
 
+class JsonMessage:
+    def __init__(self, json_str):
+        self.message = json.loads(json_str)
+
 class ZombieMessage:
     def __init__(self, zombie):
         self.message = dict()
