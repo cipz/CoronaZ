@@ -68,3 +68,12 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: pass
     depends_on: 
       - mongo
+
+  coronaz-db-consumer:
+    build:
+      context: ./coronaz-db-consumer
+      dockerfile: Dockerfile
+    restart: always
+    depends_on: 
+      - kafka
+      - mongo-express
