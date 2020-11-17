@@ -1,11 +1,13 @@
+import logging
 from threading import Lock
 import uuid
 import json
+import math
 from message import ZombieMessage, ServerMessage
 
 class Zombie:
     def __init__(self, field_size, position, infected, radius):
-        self.uuid = uuid.uuid1()
+        self.uuid = str(uuid.uuid1())
 
         self.contacts = list()
 
@@ -14,10 +16,9 @@ class Zombie:
         self._lock = Lock()
 
         self.field_size = field_size
-
-        self.position = list(position)
-
+        self.position = position
         self.infected = infected
+        self.radius = radius
 
     @property
     def has_new_contact(self):
@@ -44,12 +45,26 @@ class Zombie:
         self._position = new_pos
 
     def process_message(self, message):
-        pass
+        with self._lock:
+            m = json.loads(message)
+            logging.debug(m)
+
+            if m['uuid'] == self.uuid:
+                return
+
+            m_pos = m['position']
+            dist = math.hypot(m_pos[0] - self.position[0], m_pos[1] - self.position[1])
+            if dist > self.radius:
+                return
+
+            if m['infected']:
+                self.infected = True
+                logging.info('!!! Got infected !!!')
+            self.update_contacts(m['uuid'])
 
     def update_contacts(self, contact):
-        with self._lock:
-            self.contacts.append(contact)
-            self.has_new_contact = True
+        self.contacts.append(contact)
+        self.has_new_contact = True
 
     def move(self, direction):
         with self._lock:

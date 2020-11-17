@@ -7,7 +7,7 @@ class JsonMessage:
 class ZombieMessage:
     def __init__(self, zombie):
         self.message = dict()
-        self.message['uuid'] = str(zombie.uuid)
+        self.message['uuid'] = zombie.uuid
         self.message['position'] = zombie.position
         self.message['infected'] = zombie.infected
 
