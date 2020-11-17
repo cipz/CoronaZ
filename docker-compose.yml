@@ -77,3 +77,8 @@ services:
     depends_on: 
       - kafka
       - mongo-express
+
+  zombie-test-node-1:
+    build:
+      context: ./coronaz-zombie
+      dockerfile: Dockerfile

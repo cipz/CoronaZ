@@ -8,3 +8,5 @@ RUN pip3 install --no-cache --upgrade pip setuptools kafka-python pymongo
 WORKDIR /app 
 
 COPY *.py ./
+
+CMD python3 main.py -s kafka:9092 coronaz
