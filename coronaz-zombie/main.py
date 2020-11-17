@@ -2,6 +2,8 @@ import logging
 import sys
 from threading import Thread, Event
 from random import randint
+from kafka import KafkaProducer
+from json import dumps
 import time
 
 from zombie import Zombie
@@ -15,10 +17,22 @@ def thread_zombie(kill, zombie):
     logging.info("zombie con ended")
 
 
-def thread_server_con(kill, zombie):
+def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
+
+    # Comment for testing locally
+    # producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+    #                      value_serializer=lambda x: 
+    #                      dumps(x).encode('utf-8'))
+
     while not kill.wait(1):
         if zombie.has_new_contact:
-            logging.info("Message to server: %s" % zombie.get_next_server_message())
+
+            data = zombie.get_next_server_message()
+            logging.info("Sending message to server: %s" % data)
+
+            # Comment for testing locally
+            # producer.send(mqtt_queue, value=data)
+
     logging.info("server con ended")
 
 
@@ -36,12 +50,15 @@ def main(argv):
     radius = int(argv[6])
     zombie = Zombie(field_size, position, infected, radius)
 
+    mqtt_server_addr = argv[7]
+    mqtt_queue = argv[8]
+
     kill = Event()
 
     zombie_thread = Thread(target=thread_zombie, args=(kill, zombie))
     threads.append(zombie_thread)
 
-    server_con_thread = Thread(target=thread_server_con, args=(kill, zombie))
+    server_con_thread = Thread(target=thread_server_con, args=(kill, zombie, mqtt_server_addr, mqtt_queue))
     threads.append(server_con_thread)
 
     zombie_thread.start()
@@ -79,7 +96,7 @@ if __name__ == '__main__':
                         level=logging.DEBUG,
                         datefmt="%H:%M:%S")
 
-    if len(sys.argv) != 7:
-        print('usage: python %s field_size_x field_size_y position_x position_y infected radius' % sys.argv[0])
+    if len(sys.argv) != 9:
+        print('usage: python %s field_size_x field_size_y position_x position_y infected radius mqtt_server_addr mqtt_queue' % sys.argv[0])
     else:
         main(sys.argv)
