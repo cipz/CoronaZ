@@ -11,6 +11,7 @@ class Zombie:
         self.uuid = str(uuid.uuid1())
 
         self.contacts = list()
+        self.contacts_hist = list()
 
         self._new_contact = False
         self._moved = False
@@ -77,13 +78,19 @@ class Zombie:
                 position[0] -= 1
             elif direction == 3:
                 position[1] -= 1
+
+            if position[0] < 0 or self.field_size[0] < position[0] or position[1] < 0 or self.field_size[1] < position[1]:
+                raise Exception('walked out of bounds')
             self.position = position
             self.has_moved = True
 
     def get_next_server_message(self):
         with self._lock:
             self.has_new_contact = False
-            return ServerMessage(self).get_json()
+            message = ServerMessage(self).get_json()
+            self.contacts_hist.extend(self.contacts)
+            self.contacts = list()
+            return message
 
     def get_next_broadcast_message(self):
         with self._lock:
