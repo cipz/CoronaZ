@@ -91,10 +91,18 @@ services:
       - kafka
     network_mode: host
 
-#  zombie-test-node-2:
-#    build:
-#      context: ./coronaz-zombie
-#      dockerfile: Dockerfile
-#    depends_on: 
-#      - kafka
+  zombie-test-node-2:
+    build:
+      context: ./coronaz-zombie
+      dockerfile: Dockerfile
+    depends_on: 
+      - kafka
+    network_mode: host
 
+  zombie-test-node-3:
+    build:
+      context: ./coronaz-zombie
+      dockerfile: Dockerfile
+    depends_on: 
+      - kafka
+    network_mode: host
