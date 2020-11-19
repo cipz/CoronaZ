@@ -11,6 +11,7 @@ class Zombie:
         self.uuid = str(uuid.uuid1())
 
         self.contacts = list()
+        self.contacts_hist = list
 
         self._new_contact = False
         self._moved = False
@@ -83,7 +84,10 @@ class Zombie:
     def get_next_server_message(self):
         with self._lock:
             self.has_new_contact = False
-            return ServerMessage(self).get_json()
+            message = ServerMessage(self).get_json()
+            self.contacts_hist += self.contacts
+            self.contacts = list()
+            return message
 
     def get_next_broadcast_message(self):
         with self._lock:

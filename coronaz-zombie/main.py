@@ -107,6 +107,9 @@ def interactive(zombie):
                     time.sleep(1)
             else:
                 break
+        except KeyboardInterrupt:
+            logging.info('KeyboardInterrupt.. shutting down')
+            return
         except Exception as e:
             print(e)
 
@@ -117,7 +120,7 @@ def automatic(zombie):
             zombie.move(randint(0, 4))
             time.sleep(1)
     except KeyboardInterrupt:
-        logging.info('Got KeyboardInterrupt.. shutting down')
+        logging.info('KeyboardInterrupt.. shutting down')
         return
 
 if __name__ == '__main__':
