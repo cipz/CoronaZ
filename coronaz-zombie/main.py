@@ -77,10 +77,21 @@ def main(args):
     zombie_listen.start()
     server_con_thread.start()
 
+    if args['interactive']:
+        interactive(zombie)
+    else:
+        automatic(zombie)
+
+    kill.set()
+
+    zombie_broadcast.join()
+    zombie_listen.join()
+    server_con_thread.join()
+    logging.info('program ended')
+
+def interactive(zombie):
+    logging.info('Interactive mode')
     directions = {'n': 0, 'e': 1, 's': 2, 'w': 3}
-
-    ## TODO automatic modus
-
     while True:
         command = input('What to do: [c]ontact, [m]ove, [s]imulate, [q]uit\n')
         try:
@@ -99,13 +110,15 @@ def main(args):
         except Exception as e:
             print(e)
 
-    kill.set()
-
-    zombie_broadcast.join()
-    zombie_listen.join()
-    server_con_thread.join()
-    logging.info('program ended')
-
+def automatic(zombie):
+    logging.info('Automatic mode')
+    try:
+        for i in range(120):
+            zombie.move(randint(0, 4))
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logging.info('Got KeyboardInterrupt.. shutting down')
+        return
 
 if __name__ == '__main__':
     logging.basicConfig(#format="%(asctime)s: %(message)s",
@@ -125,8 +138,8 @@ if __name__ == '__main__':
                         help='IP address and QUEUE of the main server')
     parser.add_argument('-z', '--zombie-port', type=int, metavar='PORT', default=4711,
                         help='Port on which the broadcast messages are send')
-    parser.add_argument('-a', '--automatic', action='store_true',
-                        help='if set the client will automatically move')
+    parser.add_argument('--interactive', action='store_true',
+                        help='if set the client will be in interactive mode and waits for inputs to move')
 
     args = parser.parse_args()
     logging.debug(vars(args))

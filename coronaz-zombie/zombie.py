@@ -48,7 +48,6 @@ class Zombie:
     def process_message(self, message):
         with self._lock:
             m = json.loads(message)
-            logging.debug(m)
 
             if m['uuid'] == self.uuid:
                 return
@@ -64,7 +63,7 @@ class Zombie:
             self.update_contacts(m['uuid'])
 
     def update_contacts(self, contact):
-        self.contacts.append(contact)
+        self.contacts.append({'uuid':contact, 'timestamp':str(datetime.now())})
         self.has_new_contact = True
 
     def move(self, direction):
