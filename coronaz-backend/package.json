@@ -1,0 +1,18 @@
+{
+  "name": "coronaz-backend",
+  "version": "1.0.0",
+  "description": "Backend NodeJS server for CoronaZ application part of Distributed Systems 2020 at Helsinki University",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "devstart": "nodemon ./index.js"
+  },
+  "author": "stefko3z",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^5.10.15"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
