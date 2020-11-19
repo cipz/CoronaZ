@@ -78,6 +78,9 @@ class Zombie:
                 position[0] -= 1
             elif direction == 3:
                 position[1] -= 1
+
+            if position[0] < 0 or self.field_size[0] < position[0] or position[1] < 0 or self.field_size[1] < position[1]:
+                raise Exception('walked out of bounds')
             self.position = position
             self.has_moved = True
 
