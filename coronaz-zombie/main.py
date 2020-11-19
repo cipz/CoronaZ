@@ -45,26 +45,42 @@ def thread_zombie_listen(kill, zombie, port):
 
 def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
     # Comment for testing locally
-    # producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-    #                      value_serializer=lambda x:
-    #                      dumps(x).encode('utf-8'))
+    producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+                         value_serializer=lambda x:
+                         dumps(x).encode('utf-8'))
 
     while not kill.wait(1):
-        if zombie.has_new_contact:
-            data = zombie.get_next_server_message()
-            logging.info("Sending message to server: %s" % data)
+        #if zombie.has_new_contact:
+        data = zombie.get_next_server_message()
+        logging.info("Sending message to server %s on queue %s : %s" % (mqtt_server_addr,mqtt_queue,data))
 
-            # Comment for testing locally
-            # producer.send(mqtt_queue, value=data)
+        # Comment for testing locally
+        producer.send(mqtt_queue, value=str(data))
 
     logging.info("server con ended")
 
 
 def main(args):
+
+    time.sleep(30)
+
     zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'])
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
+
+    # producer_connection = False
+    # while not producer_connection:
+    #     try:
+    #         producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+    #                         value_serializer=lambda x:
+    #                         dumps(x).encode('utf-8'))
+    #         producer_connection = True
+    #         logging.info("producer online")
+    #         producer.close()
+    #     except:
+    #         logging.info("producer not yet online")
+    #         time.sleep(10)
 
     kill = Event()
 

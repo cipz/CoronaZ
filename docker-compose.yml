@@ -1,5 +1,9 @@
 version: '3.5'
 
+networks:
+  app_subnet:
+    external: true
+
 services:
 
   coronaz-frontend:
@@ -57,7 +61,7 @@ services:
       - '27017-27019:27017-27019'
     volumes:
       - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-
+    
   mongo-express:
     image: mongo-express
     restart: always
@@ -68,7 +72,7 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: pass
     depends_on: 
       - mongo
-
+    
   coronaz-db-consumer:
     build:
       context: ./coronaz-db-consumer
@@ -76,9 +80,21 @@ services:
     restart: always
     depends_on: 
       - kafka
-      - mongo-express
+      - mongo
+    network_mode: host
 
   zombie-test-node-1:
     build:
       context: ./coronaz-zombie
       dockerfile: Dockerfile
+    depends_on: 
+      - kafka
+    network_mode: host
+
+#  zombie-test-node-2:
+#    build:
+#      context: ./coronaz-zombie
+#      dockerfile: Dockerfile
+#    depends_on: 
+#      - kafka
+
