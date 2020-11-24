@@ -9,4 +9,4 @@ WORKDIR /app
 
 COPY *.py ./
 
-CMD python3 main.py -s kafka:9092 coronaz
+CMD python3 main.py -s localhost:9092 coronaz

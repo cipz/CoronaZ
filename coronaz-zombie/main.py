@@ -8,6 +8,7 @@ import argparse
 import socket as soc
 
 from zombie import Zombie
+from movement import step_gen
 
 
 def thread_zombie_broadcast(kill, zombie, port):
@@ -45,26 +46,39 @@ def thread_zombie_listen(kill, zombie, port):
 
 def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
     # Comment for testing locally
-    # producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-    #                      value_serializer=lambda x:
-    #                      dumps(x).encode('utf-8'))
+    producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+                         value_serializer=lambda x:
+                         dumps(x).encode('utf-8'))
 
     while not kill.wait(1):
-        if zombie.has_new_contact:
-            data = zombie.get_next_server_message()
-            logging.info("Sending message to server: %s" % data)
+        data = zombie.get_next_server_message()
+        logging.info("Sending message to server: %s" % data)
 
-            # Comment for testing locally
-            # producer.send(mqtt_queue, value=data)
+        # Comment for testing locally
+        producer.send(mqtt_queue, value=data)
 
     logging.info("server con ended")
 
 
 def main(args):
+
     zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'])
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
+
+    producer_connection = False
+    while not producer_connection:
+        try:
+            producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+                            value_serializer=lambda x:
+                            dumps(x).encode('utf-8'))
+            producer_connection = True
+            logging.info("producer online")
+            producer.close()
+        except:
+            logging.info("producer not yet online")
+            time.sleep(10)
 
     kill = Event()
 
@@ -80,7 +94,7 @@ def main(args):
     if args['interactive']:
         interactive(zombie)
     else:
-        automatic(zombie)
+        automatic(zombie, args['rounds'])
 
     kill.set()
 
@@ -103,21 +117,25 @@ def interactive(zombie):
                 zombie.process_message('{"uuid": "test", "position": %s, "infected": false}' % position)
             elif command[0].startswith('s'):
                 for i in range(25):
-                    zombie.move(randint(0, 4))
+                    zombie.move(randint(0, 3))
                     time.sleep(1)
             else:
                 break
+        except KeyboardInterrupt:
+            logging.info('KeyboardInterrupt.. shutting down')
+            return
         except Exception as e:
             print(e)
 
-def automatic(zombie):
+def automatic(zombie, rounds):
     logging.info('Automatic mode')
+    step = step_gen(zombie)
     try:
-        for i in range(120):
-            zombie.move(randint(0, 4))
+        for i in range(rounds):
+            zombie.move(next(step))
             time.sleep(1)
     except KeyboardInterrupt:
-        logging.info('Got KeyboardInterrupt.. shutting down')
+        logging.info('KeyboardInterrupt.. shutting down')
         return
 
 if __name__ == '__main__':
@@ -140,6 +158,8 @@ if __name__ == '__main__':
                         help='Port on which the broadcast messages are send')
     parser.add_argument('--interactive', action='store_true',
                         help='if set the client will be in interactive mode and waits for inputs to move')
+    parser.add_argument('--rounds', type=int, metavar='X', default=120,
+                        help='Number of steps to be performed in automatic mode. Default = 120')
 
     args = parser.parse_args()
     logging.debug(vars(args))
