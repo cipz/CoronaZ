@@ -152,8 +152,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser("main.py")
     parser.add_argument('-f', '--field', type=int, nargs=2, metavar=('X', 'Y'), default=[100, 100],
                         help='field size in form: x y')
-    parser.add_argument('-p', '--position', type=int, nargs=2, metavar=('X', 'Y'), default=[50, 50],
-                        help='starting position in form: x y')
+    parser.add_argument('-p', '--position', type=int, nargs=2, metavar=('X', 'Y'), default=[-1, -1],
+                        help='Starting position of the client. If one or both values are set to -1, the client will be placed randomly on these axis on the field. Default is "-1 -1". Input form: x y')
     parser.add_argument('-i', '--infected', action='store_true',
                         help='if set the client is infected at startup')
     parser.add_argument('-r', '--radius', type=int, metavar='X', default=10,
