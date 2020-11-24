@@ -23,7 +23,7 @@ function valuetext(value) {
   return `Day ${value}`;
 }
 
-export default function MenuBar() {
+export default function MenuBar(props) {
   const classes = useStyles();
 
   return (
@@ -42,8 +42,8 @@ export default function MenuBar() {
           valueLabelDisplay="auto"
           step={1}
           marks
-          min={0}
-          max={10}
+          min={props.min}
+          max={props.max}
         />
       </AppBar>
     </div>
