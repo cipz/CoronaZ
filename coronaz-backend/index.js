@@ -19,13 +19,7 @@ app.use(aggregatedView)
 // Create server
 const server = http.createServer(app);
 
-// Connect to MongoDB database
-mongoose.connect("mongodb://telerik:123@host.docker.internal/coronaz", { useNewUrlParser: true })
-    .then(() => server.listen(port))
-    .catch(err => {
-        console.log('Error connecting to the database', err.message);
-        process.exit(err.statusCode);
-    })
+server.listen(port);
 
 server.on('listening', () => {
     console.log(`API is running on port ${port}`);
