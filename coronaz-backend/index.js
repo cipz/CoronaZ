@@ -3,6 +3,7 @@
 const http = require('http');
 const mongoose = require('mongoose');
 const express = require('express');
+const cors = require('cors');
 
 const port = 9000;
 
@@ -11,6 +12,8 @@ const aggregatedView = require("./routes/aggregated_view");
 
 const app = express();
 app.set('port', port);
+
+app.use(cors())
 app.use(aggregatedView)
 
 // Create server
