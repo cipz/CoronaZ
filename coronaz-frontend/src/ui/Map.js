@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 import * as d3 from "d3";
-import test_data from "./test_data.json";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,8 +41,8 @@ export default function Map(props) {
             if(key != "_id") {
               console.log(value)
               svg.append("circle")
-                .attr("cx", value[0][0])
-                .attr("cy", value[0][1])
+                .attr("cx", value[0][0] * scaleFactor)
+                .attr("cy", value[0][1] * scaleFactor)
                 .attr("r", radius)
                 .attr("fill", (value[1])? "red": "blue");
             }
