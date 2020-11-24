@@ -29,6 +29,7 @@ def thread_zombie_broadcast(kill, zombie, port):
 
     logging.info("zombie broadcast ended")
 
+
 def thread_zombie_listen(kill, zombie, port):
     while not kill.is_set():
         try:
@@ -44,50 +45,50 @@ def thread_zombie_listen(kill, zombie, port):
     logging.info("zombie listen ended")
 
 
-def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue):
-    # Comment for testing locally
-    #producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-    #                     value_serializer=lambda x:
-    #                     dumps(x).encode('utf-8'))
+def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
+    if with_kafka:
+        producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+                                 value_serializer=lambda x: dumps(x).encode('utf-8'))
 
     while not kill.wait(1):
         data = zombie.get_next_server_message()
         logging.info("Sending message to server: %s" % data)
 
-        # Comment for testing locally
-        # producer.send(mqtt_queue, value=data)
+        if with_kafka:
+            producer.send(mqtt_queue, value=data)
 
     logging.info("server con ended")
 
 
 def main(args):
-
     time.sleep(30)
 
     zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'])
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
+    with_kafka = not args['no_kafka']
 
-    # producer_connection = False
-    # while not producer_connection:
-    #     try:
-    #         producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-    #                         value_serializer=lambda x:
-    #                         dumps(x).encode('utf-8'))
-    #         producer_connection = True
-    #         logging.info("producer online")
-    #         producer.close()
-    #     except:
-    #         logging.info("producer not yet online")
-    #         time.sleep(10)
+    if with_kafka:
+        producer_connection = False
+        while not producer_connection:
+            try:
+                producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
+                                         value_serializer=lambda x:
+                                         dumps(x).encode('utf-8'))
+                producer_connection = True
+                logging.info("producer online")
+                producer.close()
+            except:
+                logging.info("producer not yet online")
+                time.sleep(10)
 
     kill = Event()
 
     zombie_broadcast = Thread(target=thread_zombie_broadcast, args=(kill, zombie, args['zombie_port']))
     zombie_listen = Thread(target=thread_zombie_listen, args=(kill, zombie, args['zombie_port']))
 
-    server_con_thread = Thread(target=thread_server_con, args=(kill, zombie, mqtt_server_addr, mqtt_queue))
+    server_con_thread = Thread(target=thread_server_con, args=(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka))
 
     zombie_broadcast.start()
     zombie_listen.start()
@@ -104,6 +105,7 @@ def main(args):
     zombie_listen.join()
     server_con_thread.join()
     logging.info('program ended')
+
 
 def interactive(zombie):
     logging.info('Interactive mode')
@@ -129,6 +131,7 @@ def interactive(zombie):
         except Exception as e:
             print(e)
 
+
 def automatic(zombie, rounds):
     logging.info('Automatic mode')
     step = step_gen(zombie)
@@ -140,10 +143,11 @@ def automatic(zombie, rounds):
         logging.info('KeyboardInterrupt.. shutting down')
         return
 
+
 if __name__ == '__main__':
-    logging.basicConfig(#format="%(asctime)s: %(message)s",
-                        level=logging.DEBUG,
-                        datefmt="%H:%M:%S")
+    logging.basicConfig(  # format="%(asctime)s: %(message)s",
+        level=logging.DEBUG,
+        datefmt="%H:%M:%S")
 
     parser = argparse.ArgumentParser("main.py")
     parser.add_argument('-f', '--field', type=int, nargs=2, metavar=('X', 'Y'), default=[100, 100],
@@ -162,6 +166,7 @@ if __name__ == '__main__':
                         help='if set the client will be in interactive mode and waits for inputs to move')
     parser.add_argument('--rounds', type=int, metavar='X', default=120,
                         help='Number of steps to be performed in automatic mode. Default = 120')
+    parser.add_argument('--no-kafka', action='store_true')
 
     args = parser.parse_args()
     logging.debug(vars(args))
