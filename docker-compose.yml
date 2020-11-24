@@ -15,6 +15,17 @@ services:
       - '/app/node_modules'
     ports:
       - 3000:3000
+    depends_on: 
+      - coronaz-backend
+    
+  coronaz-backend:
+    build:
+      context: ./coronaz-backend
+      dockerfile: Dockerfile
+    ports: 
+      - 10000:9000
+    depends_on: 
+      - coronaz-db-consumer
 
   zookeeper:
     image: confluentinc/cp-zookeeper
