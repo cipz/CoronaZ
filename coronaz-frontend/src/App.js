@@ -7,6 +7,7 @@ const axios = require('axios').default;
 function App() {
 
   const [data, setData] = useState([]);
+  const [currentSelection, setCurrentSelection] = useState(0);
 
   const handleTick = () => {
     axios.get("http://host.docker.internal:10000/data")
@@ -15,6 +16,10 @@ function App() {
         setData(response.data.result);
       })
   };
+
+  const handleChange = (event, newValue) => {
+    setCurrentSelection(newValue);
+  }
 
   useEffect(() => {
     handleTick();
@@ -26,8 +31,8 @@ function App() {
 
   return (
     <div>
-      <MenuBar min={0} max={data.length} />
-      <Map height="500" width="500" radius="10" node={data[0]}/>
+      <MenuBar min={0} max={data.length - 1} handleChange={handleChange}/>
+      <Map height="500" width="500" radius="10" node={data[currentSelection]}/>
     </div>
   );
 }

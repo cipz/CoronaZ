@@ -44,6 +44,7 @@ export default function MenuBar(props) {
           marks
           min={props.min}
           max={props.max}
+          onChange={props.handleChange}
         />
       </AppBar>
     </div>
