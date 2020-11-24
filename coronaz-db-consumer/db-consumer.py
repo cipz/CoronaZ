@@ -1,7 +1,8 @@
 from kafka import KafkaConsumer
-from pymongo import MongoClient
 from json import loads
 from time import sleep
+import os
+import pymongo
 
 print("Starting db-consumer.py")
 
@@ -13,7 +14,7 @@ while not consumer_connection:
 
         consumer = KafkaConsumer(
             'coronaz',
-            bootstrap_servers=['localhost:9092'],
+            bootstrap_servers=['host.docker.internal:9092'],
             auto_offset_reset='earliest',
             enable_auto_commit=True,
             # group_id='my-group',
@@ -29,18 +30,29 @@ while not consumer_connection:
 
 print("connected to consumer")
 
-client = MongoClient('localhost:27017', username='admin', password='pass')
+client = pymongo.MongoClient('host.docker.internal:27017', username='admin', password='pass')
 collection = client.coronaz.coronaz
 
 print("connected to mongo")
 
 print(consumer)
 
+aggregation_interval = 10
+state = {}
+counter = 1
+aggregation_id = 0
 for message in consumer:
-    print("Waiting for a new message ... ")
     message = loads(message.value)
-    print(message)
-    collection.insert_one(message)
-    print('{} added to {}'.format(message, collection))
+    print('Received {}'.format(message))
+
+    state[message['uuid']] = (message['position'], message['infected'], message['timestamp'])
+
+    counter = counter + 1
+    # Aggregate based if aggregation interval is reached
+    if(counter == aggregation_interval):
+        counter = 1
+        collection.update({'_id' : aggregation_id}, state, upsert = True)
+        aggregation_id = aggregation_id + 1
+        print('{} added to {}'.format(state, collection))
 
 print("consumer out")
