@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 class ZombieMessage:
     def __init__(self, zombie):
@@ -6,6 +7,7 @@ class ZombieMessage:
         self.message['uuid'] = zombie.uuid
         self.message['position'] = zombie.position
         self.message['infected'] = zombie.infected
+        self.message['timestamp'] = str(datetime.now())
 
     def get_dict(self):
         return self.message
