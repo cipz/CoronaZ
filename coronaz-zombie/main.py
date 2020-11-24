@@ -61,7 +61,6 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
 
 
 def main(args):
-    time.sleep(30)
 
     zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'])
 
