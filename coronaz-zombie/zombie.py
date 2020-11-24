@@ -5,6 +5,8 @@ import json
 import math
 from message import ZombieMessage, ServerMessage
 from datetime import datetime
+from random import randint
+
 
 class Zombie:
     def __init__(self, field_size, position, infected, radius):
@@ -18,6 +20,7 @@ class Zombie:
         self._lock = Lock()
 
         self.field_size = field_size
+
         self.position = position
         self.infected = infected
         self.radius = radius
@@ -44,6 +47,13 @@ class Zombie:
 
     @position.setter
     def position(self, new_pos):
+        """
+        Setter for the property positon.
+        If a -1 is given it will be replaced with a random position on the board.
+        """
+        for i in range(len(new_pos)):
+            if new_pos[i] == -1:
+                new_pos[i] = randint(0, self.field_size[i])
         self._position = new_pos
 
     def process_message(self, message):
@@ -64,7 +74,7 @@ class Zombie:
             self.update_contacts(m['uuid'])
 
     def update_contacts(self, contact):
-        self.contacts.append({'uuid':contact, 'timestamp':str(datetime.now())})
+        self.contacts.append({'uuid': contact, 'timestamp': str(datetime.now())})
         self.has_new_contact = True
 
     def move(self, direction):
@@ -79,7 +89,8 @@ class Zombie:
             elif direction == 3:
                 position[1] -= 1
 
-            if position[0] < 0 or self.field_size[0] < position[0] or position[1] < 0 or self.field_size[1] < position[1]:
+            if position[0] < 0 or self.field_size[0] < position[0] or position[1] < 0 or self.field_size[1] < position[
+                1]:
                 raise Exception('walked out of bounds')
             self.position = position
             self.has_moved = True
