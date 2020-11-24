@@ -10,6 +10,8 @@
   "author": "stefko3z",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
+    "mongod": "^2.0.0",
     "mongoose": "^5.10.15"
   },
   "devDependencies": {

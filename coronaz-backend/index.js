@@ -2,22 +2,23 @@
 
 const http = require('http');
 const mongoose = require('mongoose');
+const express = require('express');
 
 const port = 9000;
 
-// No app and config yet
-//const app = require('./src/app');
-//const config = require('./src/config');
+// Create app
+const aggregatedView = require("./routes/aggregated_view");
 
-// Set API port
-//app.set('port', port);
+const app = express();
+app.set('port', port);
+app.use(aggregatedView)
 
 // Create server
-const server = http.createServer();
+const server = http.createServer(app);
 
 // Connect to MongoDB database
 mongoose.connect("mongodb://telerik:123@host.docker.internal/coronaz", { useNewUrlParser: true })
-    .then(() => server.listen(config.port))
+    .then(() => server.listen(port))
     .catch(err => {
         console.log('Error connecting to the database', err.message);
         process.exit(err.statusCode);
