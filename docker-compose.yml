@@ -26,6 +26,7 @@ services:
       - 10000:9000
     depends_on: 
       - coronaz-db-consumer
+      - mongo
 
   zookeeper:
     image: confluentinc/cp-zookeeper
