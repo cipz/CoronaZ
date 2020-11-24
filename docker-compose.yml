@@ -14,7 +14,7 @@ services:
       - './coronaz-frontend:/app'
       - '/app/node_modules'
     ports:
-      - 3000:3000
+      - 3300:3000
     depends_on: 
       - coronaz-backend
     
@@ -23,7 +23,7 @@ services:
       context: ./coronaz-backend
       dockerfile: Dockerfile
     ports: 
-      - 10000:9000
+      - 9000:9000
     depends_on: 
       - coronaz-db-consumer
       - mongo
