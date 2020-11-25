@@ -1,7 +1,10 @@
 const getData = (req, res) => {
 
     var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb://telerik:123@host.docker.internal/coronaz";
+    // Linux
+    var url = "mongodb://telerik:123@localhost/coronaz";
+    // Windows
+    // var url = "mongodb://telerik:123@host.docker.internal/coronaz";
 
     MongoClient.connect(url, function(err, db) {
         if (err) throw err;

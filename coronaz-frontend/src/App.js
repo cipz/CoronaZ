@@ -10,7 +10,10 @@ function App() {
   const [currentSelection, setCurrentSelection] = useState(0);
 
   const handleTick = () => {
-    axios.get("http://host.docker.internal:9000/data")
+    // Windows
+    // axios.get("http://host.docker.internal:9000/data")
+    //Linux
+    axios.get("http://localhost:9000/data")
       .then(response => {
         console.log(response);
         setData(response.data.result);
