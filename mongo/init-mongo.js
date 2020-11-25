@@ -8,8 +8,6 @@ db.createUser({
       }
     ]
   })
-  
-db.coronaz.insert({"msg":"initDatabase"})
 
 db.createUser({
     user: 'telerik',

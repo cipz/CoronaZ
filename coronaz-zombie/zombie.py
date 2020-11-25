@@ -81,13 +81,13 @@ class Zombie:
         with self._lock:
             position = self.position
             if direction == 0:
-                position[0] += 1
-            elif direction == 1:
                 position[1] += 1
+            elif direction == 1:
+                position[0] += 1
             elif direction == 2:
-                position[0] -= 1
-            elif direction == 3:
                 position[1] -= 1
+            elif direction == 3:
+                position[0] -= 1
 
             if position[0] < 0 or self.field_size[0] < position[0] or position[1] < 0 or self.field_size[1] < position[
                 1]:

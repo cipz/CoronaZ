@@ -14,7 +14,19 @@ services:
       - './coronaz-frontend:/app'
       - '/app/node_modules'
     ports:
-      - 3000:3000
+      - 3300:3000
+    depends_on: 
+      - coronaz-backend
+    
+  coronaz-backend:
+    build:
+      context: ./coronaz-backend
+      dockerfile: Dockerfile
+    ports: 
+      - 9000:9000
+    depends_on: 
+      - coronaz-db-consumer
+      - mongo
 
   zookeeper:
     image: confluentinc/cp-zookeeper
@@ -83,26 +95,26 @@ services:
       - mongo
     network_mode: host
 
-  zombie-test-node-1:
-    build:
-      context: ./coronaz-zombie
-      dockerfile: Dockerfile
-    depends_on: 
-      - kafka
-    network_mode: host
-
-  zombie-test-node-2:
-    build:
-      context: ./coronaz-zombie
-      dockerfile: Dockerfile
-    depends_on: 
-      - kafka
-    network_mode: host
-
-  zombie-test-node-3:
-    build:
-      context: ./coronaz-zombie
-      dockerfile: Dockerfile
-    depends_on: 
-      - kafka
-    network_mode: host
+#   zombie-test-node-1:
+#     build:
+#       context: ./coronaz-zombie
+#       dockerfile: Dockerfile
+#     depends_on: 
+#       - kafka
+#     network_mode: host
+# 
+#   zombie-test-node-2:
+#     build:
+#       context: ./coronaz-zombie
+#       dockerfile: Dockerfile
+#     depends_on: 
+#       - kafka
+#     network_mode: host
+# 
+#   zombie-test-node-3:
+#     build:
+#       context: ./coronaz-zombie
+#       dockerfile: Dockerfile
+#     depends_on: 
+#       - kafka
+#     network_mode: host
