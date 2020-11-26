@@ -6,6 +6,7 @@ from json import dumps
 import time
 import argparse
 import socket as soc
+import json
 
 from zombie import Zombie
 from movement import step_gen
@@ -66,7 +67,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
 
 
 def main(args):
-    zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'], args['infection_cooldown'])
+    zombie = Zombie(args['field'], args['position'], args['infected'], args['infection_radius'], args['infection_cooldown'])
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
@@ -100,7 +101,7 @@ def main(args):
     if args['interactive']:
         interactive(zombie)
     else:
-        automatic(zombie, args['lifetime'])
+        automatic(zombie, args['zombie_lifetime'])
 
     zombie.alive = False
 
@@ -149,6 +150,19 @@ def automatic(zombie, lifetime):
         logging.info('KeyboardInterrupt.. shutting down')
         return
 
+def parse_config_file(args):
+    with open(args['config_file'], 'r') as file:
+        data = json.load(file)
+        logging.info("Data form Config: %s" % data)
+        for k, v in data.items():
+            if k == 'field_width':
+                args['field'][0] = v
+            elif k == 'field_height':
+                args['field'][1] = v
+            else:
+                args[k] = v
+    return args
+
 
 if __name__ == '__main__':
     logging.basicConfig(  # format="%(asctime)s: %(message)s",
@@ -162,7 +176,7 @@ if __name__ == '__main__':
                         help='Starting position of the client. If one or both values are set to -1, the client will be placed randomly on these axis on the field. Default is "-1 -1". Input form: x y')
     parser.add_argument('-i', '--infected', action='store_true',
                         help='if set the client is infected at startup')
-    parser.add_argument('-r', '--radius', type=int, metavar='X', default=10,
+    parser.add_argument('-r', '--infection-radius', type=int, metavar='X', default=10,
                         help='radius in which a contact is recognized')
     parser.add_argument('-s', '--server', type=str, nargs=2, metavar=('IP', 'QUEUE'), required=True,
                         help='IP address and QUEUE of the main server')
@@ -170,13 +184,20 @@ if __name__ == '__main__':
                         help='Port on which the broadcast messages are send')
     parser.add_argument('--interactive', action='store_true',
                         help='if set the client will be in interactive mode and waits for inputs to move')
-    parser.add_argument('--lifetime', type=int, metavar='X', default=120,
+    parser.add_argument('--zombie-lifetime', type=int, metavar='X', default=120,
                         help='Number of steps to be performed in automatic mode. Default = 120')
     parser.add_argument('--infection-cooldown', type=int, metavar='X', default=15,
                         help='Time it takes to heal and become not infected anymore')
     parser.add_argument('--no-kafka', action='store_true')
+    parser.add_argument('--config-file', type=str, metavar='JSON_FILE',
+                        help='Json file with configuration arguments')
 
-    args = parser.parse_args()
-    logging.debug(vars(args))
+    args = vars(parser.parse_args())
+    logging.debug(args)
 
-    main(vars(args))
+    if args['config_file'] is not None:
+        logging.debug('Read config file..')
+        args = parse_config_file(args)
+        logging.debug('New args: %s' % args)
+
+    main(args)
