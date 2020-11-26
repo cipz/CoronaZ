@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import MenuBar from "./ui/MenuBar";
 import Map from "./ui/Map";
 
+import * as config from "./config.json";
+
 const axios = require('axios').default;
 
 function App() {
@@ -35,7 +37,7 @@ function App() {
   return (
     <div>
       <MenuBar min={0} max={data.length - 1} handleChange={handleChange}/>
-      <Map height="500" width="500" radius="10" node={data[currentSelection]}/>
+      <Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]}/>
     </div>
   );
 }

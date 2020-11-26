@@ -9,7 +9,7 @@ from random import randint
 
 
 class Zombie:
-    def __init__(self, field_size, position, infected, radius):
+    def __init__(self, field_size, position, infected, radius, infection_cooldown):
         self.uuid = str(uuid.uuid1())
 
         self.contacts = list()
@@ -24,6 +24,14 @@ class Zombie:
         self.position = position
         self.infected = infected
         self.radius = radius
+        self.infection_cooldown = infection_cooldown +1
+
+        if self.infected:
+            self.infection_remaining = self.infection_cooldown
+        else:
+            self.infection_remaining = 0
+
+        self.alive = True
 
     @property
     def has_new_contact(self):
@@ -70,8 +78,19 @@ class Zombie:
 
             if m['infected']:
                 self.infected = True
+                self.infection_remaining = self.infection_cooldown
                 logging.info('!!! Got infected !!!')
             self.update_contacts(m['uuid'])
+
+    def handle_infection(self):
+        with self._lock:
+            if not self.infected:
+                return
+
+            self.infection_remaining -= 1
+            if self.infection_remaining <= 0:
+                self.infection_remaining = 0
+                self.infected = False
 
     def update_contacts(self, contact):
         self.contacts.append({'uuid': contact, 'timestamp': str(datetime.now())})
