@@ -27,6 +27,7 @@ services:
     depends_on: 
       - coronaz-db-consumer
       - mongo
+    network_mode: host
 
   zookeeper:
     image: confluentinc/cp-zookeeper

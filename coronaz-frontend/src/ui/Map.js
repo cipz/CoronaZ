@@ -38,7 +38,7 @@ export default function Map(props) {
         
         if(node) {
           Object.entries(node).forEach(([key, value]) => {
-            if(key != "_id") {
+            if(key !== "_id") {
               console.log(value)
               svg.append("circle")
                 .attr("cx", value[0][0] * scaleFactor)

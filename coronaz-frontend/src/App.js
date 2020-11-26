@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import MenuBar from "./ui/MenuBar";
 import Map from "./ui/Map";
 
+import * as config from "./config.json";
+
 const axios = require('axios').default;
 
 function App() {
@@ -10,7 +12,10 @@ function App() {
   const [currentSelection, setCurrentSelection] = useState(0);
 
   const handleTick = () => {
-    axios.get("http://host.docker.internal:9000/data")
+    // Windows
+    // axios.get("http://host.docker.internal:9000/data")
+    //Linux
+    axios.get("http://localhost:9000/data")
       .then(response => {
         console.log(response);
         setData(response.data.result);
@@ -32,7 +37,7 @@ function App() {
   return (
     <div>
       <MenuBar min={0} max={data.length - 1} handleChange={handleChange}/>
-      <Map height="500" width="500" radius="10" node={data[currentSelection]}/>
+      <Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]}/>
     </div>
   );
 }
