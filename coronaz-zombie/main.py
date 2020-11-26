@@ -12,19 +12,20 @@ from movement import step_gen
 
 
 def thread_zombie_broadcast(kill, zombie, port):
+    def send_message(to, message):
+        s = soc.socket(soc.AF_INET, soc.SOCK_DGRAM)
+        s.setsockopt(soc.SOL_SOCKET, soc.SO_BROADCAST, 1)
+        s.sendto(message, (to, port))
+
     while not kill.wait(1):
         if zombie.has_moved:
             m = zombie.get_next_broadcast_message()
 
-            s = soc.socket(soc.AF_INET, soc.SOCK_DGRAM)
-            s.setsockopt(soc.SOL_SOCKET, soc.SO_BROADCAST, 1)
-            s.sendto(bytes(m, 'utf-8'), ('255.255.255.255', port))
+            send_message('255.255.255.255', bytes(m, 'utf-8'))
 
             logging.info("Broadcast to other zombies: %s" % m)
 
-    s = soc.socket(soc.AF_INET, soc.SOCK_DGRAM)
-    s.setsockopt(soc.SOL_SOCKET, soc.SO_BROADCAST, 1)
-    s.sendto(b'stop', ('127.0.0.1', port))
+    send_message('127.0.0.1', b'stop')
     logging.debug('Contacted zombie listener to stop')
 
     logging.info("zombie broadcast ended")
@@ -49,13 +50,17 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
     if with_kafka:
         producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
                                  value_serializer=lambda x: dumps(x).encode('utf-8'))
-
-    while not kill.wait(1):
+    def send_message():
         data = zombie.get_next_server_message()
         logging.info("Sending message to server: %s" % data)
 
         if with_kafka:
             producer.send(mqtt_queue, value=data)
+
+    while not kill.wait(1):
+        send_message()
+
+    send_message()
 
     logging.info("server con ended")
 
@@ -95,7 +100,9 @@ def main(args):
     if args['interactive']:
         interactive(zombie)
     else:
-        automatic(zombie, args['rounds'])
+        automatic(zombie, args['lifetime'])
+
+    zombie.alive = False
 
     kill.set()
 
@@ -130,11 +137,11 @@ def interactive(zombie):
             print(e)
 
 
-def automatic(zombie, rounds):
+def automatic(zombie, lifetime):
     logging.info('Automatic mode')
     step = step_gen(zombie)
     try:
-        for i in range(rounds):
+        for i in range(lifetime):
             zombie.move(next(step))
             time.sleep(1)
     except KeyboardInterrupt:
@@ -162,8 +169,10 @@ if __name__ == '__main__':
                         help='Port on which the broadcast messages are send')
     parser.add_argument('--interactive', action='store_true',
                         help='if set the client will be in interactive mode and waits for inputs to move')
-    parser.add_argument('--rounds', type=int, metavar='X', default=120,
+    parser.add_argument('--lifetime', type=int, metavar='X', default=120,
                         help='Number of steps to be performed in automatic mode. Default = 120')
+    parser.add_argument('--infection-cooldown', type=int, metavar='X', default=15,
+                        help='Time it takes to heal and become not infected anymore')
     parser.add_argument('--no-kafka', action='store_true')
 
     args = parser.parse_args()

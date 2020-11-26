@@ -25,6 +25,8 @@ class Zombie:
         self.infected = infected
         self.radius = radius
 
+        self.alive = True
+
     @property
     def has_new_contact(self):
         return self._new_contact

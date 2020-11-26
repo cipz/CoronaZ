@@ -8,6 +8,7 @@ class ZombieMessage:
         self.message['position'] = zombie.position
         self.message['infected'] = zombie.infected
         self.message['timestamp'] = str(datetime.now())
+        self.message['alive'] = zombie.alive
 
     def get_dict(self):
         return self.message
