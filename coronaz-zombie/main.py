@@ -178,7 +178,7 @@ if __name__ == '__main__':
                         help='if set the client is infected at startup')
     parser.add_argument('-r', '--infection-radius', type=int, metavar='X', default=10,
                         help='radius in which a contact is recognized')
-    parser.add_argument('-s', '--server', type=str, nargs=2, metavar=('IP', 'QUEUE'), required=True,
+    parser.add_argument('-s', '--server', type=str, nargs=2, metavar=('IP', 'QUEUE'),
                         help='IP address and QUEUE of the main server')
     parser.add_argument('-z', '--zombie-port', type=int, metavar='PORT', default=4711,
                         help='Port on which the broadcast messages are send')
