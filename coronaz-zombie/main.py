@@ -66,7 +66,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
 
 
 def main(args):
-    zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'])
+    zombie = Zombie(args['field'], args['position'], args['infected'], args['radius'], args['infection_cooldown'])
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
@@ -143,6 +143,7 @@ def automatic(zombie, lifetime):
     try:
         for i in range(lifetime):
             zombie.move(next(step))
+            zombie.handle_infection()
             time.sleep(1)
     except KeyboardInterrupt:
         logging.info('KeyboardInterrupt.. shutting down')
