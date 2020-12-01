@@ -28,15 +28,15 @@ then
     printf "\nEditing run parameters "
     printf "\nfield_width (default 100): "
     read -r field_width
-    printf "\nfield_height (default 100): "
+    printf "field_height (default 100): "
     read -r field_height
-    printf "\nscale_factor (default 5): "
+    printf "scale_factor (default 5): "
     read -r scale_factor
-    printf "\nzombie_lifetime (default 120): "
+    printf "zombie_lifetime (default 120): "
     read -r zombie_lifetime
-    printf "\ninfection_radius (default 2): "
+    printf "infection_radius (default 2): "
     read -r infection_radius
-    printf "\ninfection_cooldown (default 15): "
+    printf "infection_cooldown (default 15): "
     read -r infection_cooldown
 
     # Setting default variables if the user didn't give anything in input
@@ -82,13 +82,13 @@ else
 
 fi
 
-printf "\nCreating docker network ... "
+printf "\nCreating docker network ... \n"
 docker network create --gateway 172.16.1.1 --subnet 172.16.1.0/24 app_subnet
 
-printf "\nBuilding coronaz-zombie image ... "
+printf "\nBuilding coronaz-zombie image ... \n"
 docker build coronaz-zombie --tag coronaz_node:latest
 
-printf "\nGetting everything up and running in detached mode ... "
+printf "\nGetting everything up and running in detached mode ... \n"
 docker-compose up --build -d
 
 infected_node_count=0
@@ -115,17 +115,17 @@ do
     read -r input
 
     case $input in
-        1) printf "\nAdding 1 non-infected node"
+        1) printf "\nAdding 1 non-infected node\n"
             ((safe_node_count+=1))
             ((total_node_count+=1))
             docker run -d --net=host --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
             ;;
-        2) printf "\nAdd 1 infected node"
+        2) printf "\nAdd 1 infected node\n"
             ((infected_node_count+=1))
             ((total_node_count+=1))
             docker run -d --net=host -e RUN_ARGS="-i" --name=coronaz_node_$total_node_count\_infected_$infected_node_count coronaz_node:latest
             ;;
-        3) printf "\nHow many non-infected nodes do you want to add?"
+        3) printf "\nHow many non-infected nodes do you want to add? "
             read -r num_nodes
             for i in $(seq 1 $num_nodes)
             do
@@ -134,7 +134,7 @@ do
                 docker run -d --net=host --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
             done
             printf "\n"
-            printf "\nHow many infected nodes do you want t\o add?"
+            printf "\nHow many infected nodes do you want t\o add? "
             read -r num_nodes
             for i in $(seq 1 $num_nodes)
             do
@@ -143,21 +143,23 @@ do
                 docker run -d --net=host -e RUN_ARGS="-i" --name=coronaz_node_$total_node_count\_infected_$infected_node_count coronaz_node:latest
             done
             ;;
-        0) printf "\nExiting ... "
+        0) printf "\nExiting ... \n"
             end=true
             ;;
-        *) printf "\nNot a valid input. Try again."
+        *) printf "\nNot a valid input. Try again.\n"
             ;;
     esac
-    printf "\n"
+    sleep 1s
 done
 
+sleep 1s
+
 printf "\n"
-printf "\nStopping and removing the node containers ... "
+printf "\nStopping and removing the node containers ... \n"
 docker stop $(docker ps -aq)
 docker rm $(docker ps -aq)
 printf "\n"
-printf "\nStopping the docker-compose containers ... "
+printf "\nStopping the docker-compose containers ... \n"
 docker-compose down -v
 
 exit 0
