@@ -23,7 +23,7 @@
 \begin{document}
 
 \title{\textit{CoronaZ}: another distributed systems project
-%\\{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and should not be used}
+\\{\Large Simulating a contact tracing application in a scalable environment}
 %\thanks{Identify applicable funding agency here. If none, delete this.}
 }
 
@@ -33,16 +33,18 @@
 	\IEEEauthorblockA{Università degli Studi di Padova}
 	\textit{stefanciprian.voinea@studenti.unipd.it}
 	\and
-	\IEEEauthorblockN{Name Surname}
+	\IEEEauthorblockN{Stefan Vladov}
 	\IEEEauthorblockA{University}
 	\textit{mail}
 	\and
-	\IEEEauthorblockN{Name Surname}
+	\IEEEauthorblockN{Fabian Rensing}
 	\IEEEauthorblockA{University}
 	\textit{mail}
 }
 
 \maketitle
+\thispagestyle{plain}
+\pagestyle{plain}
 
 %\begin{abstract}
 %This document is a model and instructions for \LaTeX.
@@ -72,11 +74,11 @@
 	In this section we describe and explain why we have decided to use certain technologies rather than others.
 	
 	\begin{itemize}
-		\item \textit{Programming language}:
-		\item \textit{MQTT Broker}:
-		\item \textit{Containers}:
-		\item \textit{Database}:
-		\item \textit{Front-end}:
+		\item \textit{Programming language}: we chose Python because it is a fast programming language for creating prototypes. Also all group components are fluent with Python;
+		\item \textit{MQTT Broker}: we chose \textit{Apache Kafka} as broker for our project since it is one of the most used brokers in the market and it is has a large community that supports the project. Apache Kafka also handles well scaling and integration with other systems;
+		\item \textit{Containers}: we chose to use \textit{Docker} and \textit{docker-compose} given the easiness of constructing and spawning nodes. As explained in \ref{sec:architecture}, we have a \texttt{docker-compose.yml} that handles that base components such as the broker and the database;
+		\item \textit{Database}: we chose \textit{MongoDB} for the scalability and the ability to adapt to new data formats. Also because some group components had previous experience with it;
+		\item \textit{Front-end}: we chose \textit{NodeJS} since, like for the database, some group components had previous experience with it.
 	\end{itemize}
 
 	\subsection{System requirements}
@@ -88,6 +90,8 @@
 		\end{itemize}
 
 \section{Architecture}\label{sec:architecture}
+	
+	We can divide our project in four major areas: \textit{nodes}, \textit{broker}, \textit{DB consumer}, \textit{database}, \textit{front-end}.
 
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/coronaz.png}}
@@ -95,81 +99,101 @@
 		\label{fig:architecture}
 	\end{figure}
 	
-	We can divide our project in four major areas: \textit{nodes}, \textit{broker}, \textit{DB consumer}, \textit{database}, \textit{front-end}.
-
 	\subsection{Nodes}
 	
-		This can be considered a single area since each node can be spawned separately from one another.
+		This can be considered a single component since each node can be spawned separately from one another.
 		
-		When each node spawns in the map it is placed on a random position.
-		
+		\hl{When each node spawns in the map it is placed on a random position.
 		Every second the node will ``move''.
-		When the node moves
+		When the node moves}
 		
-		Nodes introduced into the simulation can be \textit{infected} or \textit{non-infected} (or \textit{safe}).
-		When a node is infected it will keep steady and will not move for a certain amount of time declared in the parameter \texttt{infection\_cooldown}, which defines the number of seconds that the node will stay in place.
+		\hl{Nodes introduced into the simulation can be \textit{infected} or \textit{non-infected} (or \textit{safe}).
+		When a node is infected it will keep steady and will not move for a certain amount of time declared in the parameter \texttt{infection\_cooldown}, which defines the number of seconds that the node will stay in place.}
 		
 		In our simulation the nodes can all connect to each other since they are all in the same network and each of them can hear the data sent in broadcast by the others.
 		In a more realistic situation nodes would be only capable of hearing the signals of nodes nearby them, like in Fig.\ref{fig:architecture}~where node \textit{A} can communicate only with node \textit{B} and nodes \textit{B}, \textit{C} and \textit{D} are nearby each other enough for them to hear their signal.
 
+		\hl{Here is an example of a message that is sent in broadcast from a node:}
+		\begin{verbatim}
+{  
+   "uuid":"ff0a1bda-34b9-11eb-b339-98fa9b2194f9",
+   "position":[1, 5],
+   "infected":false,
+   "timestamp":"2020-12-02 16:19:36.945151",
+   "alive":true
+}  
+		\end{verbatim}
+
 	\subsection{MQTT broker}	
 	
 		Apache Kafka is composed by the Kafka container and the Zookeeper container.
-		These can be considered one single 
+		Kafka is an important part in the project since it is the \textit{broker} in the \textit{publish-subscribe} pattern.
+		
+		Each node, after it has collected the IDs of the other nearby it, will send the list ot these IDs, with other information, to the broker.
+		The \textit{topic}, in our code, used by the nodes is ``\textit{coronaz}''.
+		This will contain all the information send by the nodes to the broker, which will later forward them to the consumer when it asks for them.
+		
+		\hl{Here is an example of a message that is sent to the broker:}
+		\begin{verbatim}
+tmp
+tmp
+tmp
+		\end{verbatim}
+		
 	
 	\subsection{DB consumer}
 	
-		The DB consumer can be considered as a single entity since it is independent bot from Kafka and from Mongo.
-		The consumer is subscribed to the Kafka topic that contains the new messages from the nodes.
+		The DB consumer can be considered as a single entity since it is independent both from Kafka and from Mongo.
+		The consumer is subscribed to the Kafka topic that contains the new messages from the nodes, in our case ``\textit{coronaz}''.
 		When a new message arrives, the consumer gets it and, every ten messages, it aggregates them in a \texttt{json} that will be sent to the MongoDB database.
 	
 	\subsection{Database}
 	
-		MongoDB is the database of our system.
-		As the other components it has been containerized in Docker.
+		As the other components, the database runs in a Docker container.
 		
 		It accepts and stores incoming data from the Consumer.
 		The database is accessible from the front-end, which will request data every second in order to always display fresh information.
 	
-%		\begin{figure}[htbp]
-%			\centerline{\includegraphics[width=\linewidth]{img/database.png}}
-%			\caption{CoronaZ database structure.}
-%			\label{fig:database}
-%		\end{figure}
+		\begin{figure}[htbp]
+			\centerline{\includegraphics[width=\linewidth]{img/database.png}}
+			\caption{CoronaZ database structure.}
+			\label{fig:database}
+		\end{figure}
 	
 	\subsection{Front-end}
 	
-		The front-end of the project, programmed using NodeJS, shows the evolution of the system and the simulation.
-		This means that it shows the movement of the nodes in the map, along with which one has been infected or not.
+		The front-end of the project, programmed using NodeJS, shows the evolution of the system and the simulations.
+		It shows the movement of the nodes in the map, along with which one has been infected or not.
 		
-%		\begin{figure}[htbp]
-%			\centerline{\includegraphics[width=\linewidth]{img/frontend.png}}
-%			\caption{CoronaZ front-end.}
-%			\label{fig:front-end}
-%		\end{figure}
+		\begin{figure}[htbp]
+			\centerline{\includegraphics[width=\linewidth]{img/frontend.png}}
+			\caption{CoronaZ front-end.}
+			\label{fig:front-end}
+		\end{figure}
 
 \section{Scalability and fault tolerance}
 
 	We have tested the scalability and the fault tolerance of the project in the following ways:
 	
 	\begin{itemize}
-		\item \textit{unexpectedly shutting down the MongoDB database}:
-		\item \textit{unexpectedly shutting down the consumer}:
-		\item \textit{unexpectedly shutting down the front end}:
-		\item \textit{unexpectedly shutting down the broker}:
-		\item \textit{adding more nodes}:
+		\item \hl{\textit{unexpectedly shutting down the MongoDB database}:}
+		\item \hl{\textit{unexpectedly shutting down the consumer}:}
+		\item \hl{\textit{unexpectedly shutting down the front end}:}
+		\item \hl{\textit{unexpectedly shutting down the broker}:}
+		\item \hl{\textit{adding more nodes}:}
 	\end{itemize}
 	
 \section{Simulation}\label{sec:simulation}
 
 	To start the project we have made a \textit{init-project.sh} script that asks the parameters with which the simulation will take place, that creates the docker network, executes the \texttt{docker-compose} (\texttt{up} and \texttt{down}) commands and manages (and spawns) the number of nodes.
 	
-%		\begin{figure}[htbp]
-%			\centerline{\includegraphics[width=\linewidth]{img/script.png}}
-%			\caption{CoronaZ front-end.}
-%			\label{fig:front-end}
-%		\end{figure}
+	\begin{figure}[htbp]
+		\centerline{\includegraphics[width=\linewidth]{img/script.png}}
+		\caption{CoronaZ front-end.}
+		\label{fig:frontend}
+	\end{figure}
 
+	The script will ask for the run parameters and will set them on the file, otherwise will run with a set of defaults.
 	The default parameters for the run are (in \textit{json} format):
 	\begin{verbatim}
     {
@@ -182,22 +206,21 @@
     }
 	\end{verbatim}
 	
-%		\begin{figure}[htbp]
-%			\centerline{\includegraphics[width=\linewidth]{img/sim_1.png}}
-%			\caption{CoronaZ simulation at time X.}
-%			\label{fig:sim_1}
-%		\end{figure}
-%		\begin{figure}[htbp]
-%			\centerline{\includegraphics[width=\linewidth]{img/sim_2.png}}
-%			\caption{CoronaZ simulation at time X+Y.}
-%			\label{fig:sim_2}
-%		\end{figure}
-%		\begin{figure}[htbp]
-%			\centerline{\includegraphics[width=\linewidth]{img/sim_3.png}}
-%			\caption{CoronaZ simulation at time X+Y+Z.}
-%			\label{fig:sim_3}
-%		\end{figure}
-
+	\begin{figure}[htbp]
+		\centerline{\includegraphics[width=\linewidth]{img/sim_1.png}}
+		\caption{CoronaZ simulation at time X.}
+		\label{fig:sim_1}
+	\end{figure}
+	\begin{figure}[htbp]
+		\centerline{\includegraphics[width=\linewidth]{img/sim_2.png}}
+		\caption{CoronaZ simulation at time X+Y.}
+		\label{fig:sim_2}
+	\end{figure}
+	\begin{figure}[htbp]
+		\centerline{\includegraphics[width=\linewidth]{img/sim_3.png}}
+		\caption{CoronaZ simulation at time X+Y+Z.}
+		\label{fig:sim_3}
+	\end{figure}
 
 \section{Future work}\label{sec:future_work}
 
