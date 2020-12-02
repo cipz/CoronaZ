@@ -63,7 +63,7 @@ then
         <<<'{}'s \
         > tmp_config.json 2>/dev/null
 
-        cat tmp_config.json
+        # cat tmp_config.json
 
         cp tmp_config.json coronaz-zombie/config.json
         cp tmp_config.json coronaz-frontend/config.json
@@ -134,7 +134,7 @@ do
                 docker run -d --net=host --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
             done
             printf "\n"
-            printf "\nHow many infected nodes do you want t\o add? "
+            printf "\nHow many infected nodes do you want to add? "
             read -r num_nodes
             for i in $(seq 1 $num_nodes)
             do
