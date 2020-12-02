@@ -32,6 +32,7 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper
     hostname: zookeeper
+    # restart: always
     ports:
       - "2182:2182"
     environment:
@@ -47,6 +48,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka
     hostname: kafka
+    # restart: always
     ports:
       - "9092:9092"
     environment:
