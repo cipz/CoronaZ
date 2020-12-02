@@ -60,7 +60,8 @@ def main(args):
 
 if __name__ == '__main__':
     logging.basicConfig(  # format="%(asctime)s: %(message)s",
-        level=logging.DEBUG,
+        # level=logging.DEBUG,
+        level=logging.INFO,
         datefmt="%H:%M:%S")
 
     args = get_cli_arguments()
