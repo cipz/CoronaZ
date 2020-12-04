@@ -7,7 +7,7 @@ import time
 from zombie import Zombie
 from cli_parser import get_cli_arguments
 from zombie_modes import interactive, automatic
-from zombie_threads import thread_zombie_broadcast, thread_zombie_listen, thread_server_con
+from zombie_threads import thread_zombie_broadcast, thread_zombie_listen, thread_server_con, get_producer_connection
 
 
 def main(args):
@@ -19,18 +19,7 @@ def main(args):
     with_kafka = not args['no_kafka']
 
     if with_kafka:
-        producer_connection = False
-        while not producer_connection:
-            try:
-                producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-                                         value_serializer=lambda x:
-                                         dumps(x).encode('utf-8'))
-                producer_connection = True
-                logging.info("producer online")
-                producer.close()
-            except:
-                logging.info("producer not yet online")
-                time.sleep(10)
+        get_producer_connection(mqtt_server_addr, 15)
 
     kill = Event()
 
