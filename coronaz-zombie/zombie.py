@@ -75,6 +75,7 @@ class Zombie:
             dist = math.hypot(m_pos[0] - self.position[0], m_pos[1] - self.position[1])
             if dist > self.radius:
                 return
+            logging.info('Met other zombie: %s' % m['uuid'])
 
             if m['infected']:
                 self.infected = True

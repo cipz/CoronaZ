@@ -51,7 +51,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
 
         if with_kafka:
             if not producer.bootstrap_connected():
-                get_producer_connection(mqtt_server_addr, 15)
+                get_producer_connection(mqtt_server_addr, 20)
 
             producer.send(mqtt_queue, value=data)
 
