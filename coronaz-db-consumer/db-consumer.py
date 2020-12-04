@@ -15,7 +15,7 @@ while not consumer_connection:
         consumer = KafkaConsumer(
             'coronaz',
             # Linux
-            bootstrap_servers=['localhost:9092'],
+            bootstrap_servers=['kafka:9092'],
             # Windows
             # bootstrap_servers=['host.docker.internal:9092'],
             auto_offset_reset='earliest',
@@ -34,7 +34,7 @@ while not consumer_connection:
 print("connected to consumer")
 
 # Linux
-client = pymongo.MongoClient('localhost:27017', username='admin', password='pass')
+client = pymongo.MongoClient('mongo:27019', username='telerik', password='123')
 # Windows
 # client = pymongo.MongoClient('host.docker.internal:27017', username='admin', password='pass')
 collection = client.coronaz.coronaz

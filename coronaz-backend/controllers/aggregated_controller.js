@@ -2,7 +2,7 @@ const getData = (req, res) => {
 
     var MongoClient = require('mongodb').MongoClient;
     // Linux
-    var url = "mongodb://telerik:123@localhost/coronaz";
+    var url = "mongodb://telerik:123@mongo/coronaz";
     // Windows
     // var url = "mongodb://telerik:123@host.docker.internal/coronaz";
 
