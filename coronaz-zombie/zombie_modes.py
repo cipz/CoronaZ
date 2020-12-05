@@ -35,7 +35,10 @@ def automatic(zombie, lifetime):
     step = step_gen(zombie)
     try:
         for i in range(lifetime):
-            zombie.move(next(step))
+            if not zombie.infected or zombie.protected:
+                logging.debug('moving..')
+                zombie.move(next(step))
+
             zombie.handle_infection()
             time.sleep(1)
     except KeyboardInterrupt:
