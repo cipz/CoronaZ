@@ -256,7 +256,7 @@
 	
 	Setting the network mode in another way, for example with \texttt{network mode:host}, would have created problems IP assignment and in the ports.
 	
-\section{Scalability and fault tolerance}
+\section{Scalability and fault tolerance}\label{sec:scalability}
 
 	We have tested the scalability and the fault tolerance of the project in the following ways:
 	
@@ -326,7 +326,7 @@
 		\label{fig:sim_3}
 	\end{figure}
 
-\section{Performance evaluation}
+\section{Performance evaluation}\label{sec:performance}
 
 	
 
@@ -341,6 +341,13 @@
 \section{Conclusions}\label{sec:conclusions}
 
 	This project represents a simulation of a contact tracing application where each node that spawns in out network communicates its position to the others in range and will send the data collected to a central server with the \textit{publish-subscribe} pattern.
+	
+	The running system implements the basic goals and functionalities requested in the given programming task sheet.
+	As explained in \ref{sec:scalability} it supports scalability and fault tolerance.
+	The end user of the system can decide how many nodes to add.
+	In \ref{sec:performance} there is the analysis of how the system performs and how much data is sent in the network in the time of the simulation.
+	Improvements, both in the system's architecture and it's performance are discussed in \ref{sec:future_work}.
+	This project hows these three characteristics: \textit{naming and node discovery}, \textit{synchronization and consistency}, \textit{fault tolerance}.
 
 \begin{thebibliography}{00}
 	
