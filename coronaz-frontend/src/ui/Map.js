@@ -2,12 +2,11 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 import * as d3 from "d3";
-import { gray } from 'd3';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    border: "1px solid black",
+    padding: 2
   },
   title: {
     flexGrow: 1,
@@ -32,10 +31,21 @@ export default function Map(props) {
           .select("svg")
           .remove();
 
+        // Initialize svg container
         var svg = d3.select(ref.current)
         .append("svg")
         .attr("width", width * scaleFactor)
         .attr("height", height * scaleFactor);
+        
+        // Add border
+        svg.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", width * scaleFactor)
+                .attr("height", height * scaleFactor)
+                .attr("fill", "none")
+                .attr("stroke-width", 2)
+                .attr("stroke", "rgb(0,0,0)");
         
         if(node) {
           Object.entries(node).forEach(([key, value]) => {
@@ -50,7 +60,7 @@ export default function Map(props) {
               svg.append("circle")
                 .attr("cx", value.position[0] * scaleFactor)
                 .attr("cy", value.position[1] * scaleFactor)
-                .attr("r", radius)
+                .attr("r", radius * scaleFactor)
                 .attr("fill", fill);
             }
           }) 
