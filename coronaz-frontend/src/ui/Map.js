@@ -64,8 +64,8 @@ export default function Map(props) {
                 }
 
                 svg.append("svg:image")
-                .attr('x', value.position[0] * scaleFactor - 0.75 * radius * scaleFactor)
-                .attr('y', value.position[1] * scaleFactor - 0.75 * radius * scaleFactor)
+                .attr('x', value.position[0] * scaleFactor - radius * scaleFactor)
+                .attr('y', value.position[1] * scaleFactor - radius * scaleFactor)
                 .attr("preserveAspectRatio", "none")
                 .attr('width', 2 * radius * scaleFactor)
                 .attr('height', 2 * radius * scaleFactor)
