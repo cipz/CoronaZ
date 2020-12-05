@@ -32,6 +32,8 @@ def get_cli_arguments():
                         help='Time it takes to heal and become not infected anymore')
     parser.add_argument('--config-file', type=str, metavar='JSON_FILE',
                         help='Json file with configuration arguments')
+    parser.add_argument('--move-when-infected', action='store_true',
+                        help='if set the infected zombies still move')
 
     args = vars(parser.parse_args())
 

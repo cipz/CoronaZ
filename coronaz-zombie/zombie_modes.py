@@ -30,12 +30,12 @@ def interactive(zombie):
             print(e)
 
 
-def automatic(zombie, lifetime):
+def automatic(zombie, args):
     logging.info('Automatic mode')
     step = step_gen(zombie)
     try:
-        for i in range(lifetime):
-            if not zombie.infected or zombie.protected:
+        for i in range(args['zombie_lifetime']):
+            if args['move_when_infected'] or not zombie.infected or zombie.protected:
                 logging.debug('moving..')
                 zombie.move(next(step))
 

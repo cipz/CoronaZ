@@ -31,7 +31,7 @@ def main(args):
     if args['interactive']:
         interactive(zombie)
     else:
-        automatic(zombie, args['zombie_lifetime'])
+        automatic(zombie, args)
 
     zombie.alive = False
 
