@@ -6,32 +6,33 @@ import pymongo
 
 print("Starting db-consumer.py")
 
-consumer_connection = False
 
-while not consumer_connection:
+def get_consumer_connection():
+    consumer_connection = False
+    consumer = None
 
-    try:
+    while not consumer_connection:
+        try:
+            consumer = KafkaConsumer(
+                'coronaz',
+                # Linux
+                bootstrap_servers=['kafka:9094'],
+                # Windows
+                # bootstrap_servers=['host.docker.internal:9092'],
+                auto_offset_reset='earliest',
+                enable_auto_commit=True,
+                # group_id='my-group',
+                group_id=None,
+                value_deserializer=lambda x: loads(x.decode('utf-8')))
 
-        consumer = KafkaConsumer(
-            'coronaz',
-            # Linux
-            bootstrap_servers=['kafka:9094'],
-            # Windows
-            # bootstrap_servers=['host.docker.internal:9092'],
-            auto_offset_reset='earliest',
-            enable_auto_commit=True,
-            # group_id='my-group',
-            group_id=None,
-            value_deserializer=lambda x: loads(x.decode('utf-8')))
+            consumer_connection = True
+        except:
+            print("consumer not yet online")
+            sleep(10)
 
-        consumer_connection = True
+    print("connected to consumer")
+    return consumer
 
-    except:
-        
-        print("consumer not yet online")
-        sleep(10)
-
-print("connected to consumer")
 
 # Linux
 client = pymongo.MongoClient('mongo', username='admin', password='pass')
@@ -40,6 +41,8 @@ client = pymongo.MongoClient('mongo', username='admin', password='pass')
 collection = client.coronaz.coronaz
 
 print("connected to mongo")
+
+consumer = get_consumer_connection()
 
 print(consumer)
 
@@ -52,23 +55,26 @@ for message in consumer:
     print('Received {}'.format(message))
 
     state[message['uuid']] = {
-        "position" : message['position'],
-        "timestamp" : message['timestamp'], 
-        "infected" : message['infected'],
+        "position": message['position'],
+        "timestamp": message['timestamp'],
+        "infected": message['infected'],
         "alive": message['alive']
     }
-    
+
     # If a node dies, trigger a new state
-    if(message['alive']):
+    if (message['alive']):
         counter = counter + 1
     else:
         counter = aggregation_interval
-    
+
     # Aggregate based if aggregation interval is reached
-    if(counter == aggregation_interval):
+    if (counter == aggregation_interval):
         counter = 1
-        collection.update({'_id' : aggregation_id}, state, upsert = True)
+        collection.update({'_id': aggregation_id}, state, upsert=True)
         aggregation_id = aggregation_id + 1
         print('{} added to {}'.format(state, collection))
+
+    if not consumer.bootstrap_connected():
+        consumer = get_consumer_connection()
 
 print("consumer out")
