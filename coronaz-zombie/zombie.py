@@ -23,11 +23,12 @@ class Zombie:
 
         self.position = position
         self.infected = infected
+        self.protected = False
         self.radius = radius
         self.infection_cooldown = infection_cooldown +1
 
         if self.infected:
-            self.infection_remaining = self.infection_cooldown
+            self.infection_remaining = 2*self.infection_cooldown
         else:
             self.infection_remaining = 0
 
@@ -78,20 +79,28 @@ class Zombie:
             logging.info('Met other zombie: %s' % m['uuid'])
 
             if m['infected']:
-                self.infected = True
-                self.infection_remaining = self.infection_cooldown
-                logging.info('!!! Got infected !!!')
+                if not self.protected and not self.infected:
+                    self.infected = True
+                    self.infection_remaining = 2 * self.infection_cooldown
+                    logging.info('!!! Got infected !!!')
             self.update_contacts(m['uuid'])
 
     def handle_infection(self):
         with self._lock:
-            if not self.infected:
+            if not self.infected and not self.protected:
+                logging.debug('No infection to handle')
                 return
 
             self.infection_remaining -= 1
-            if self.infection_remaining <= 0:
-                self.infection_remaining = 0
+            if self.infection_remaining <= self.infection_cooldown:
+                logging.debug('in protected mode')
                 self.infected = False
+                self.protected = True
+
+            if self.infection_remaining <= 0:
+                logging.debug('out of protected mode')
+                self.protected = False
+                self.infection_remaining = 0
 
     def update_contacts(self, contact):
         self.contacts.append({'uuid': contact, 'timestamp': str(datetime.now())})
