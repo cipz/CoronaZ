@@ -9,6 +9,7 @@ from cli_parser import get_cli_arguments
 from zombie_modes import interactive, automatic
 from zombie_threads import thread_zombie_broadcast, thread_zombie_listen, thread_server_con, get_producer_connection
 
+KAFKA_CONNECTION_TRIES = 20
 
 def main(args):
     zombie = Zombie(args['field'], args['position'], args['infected'], args['infection_radius'],
@@ -19,7 +20,7 @@ def main(args):
     with_kafka = not args['no_kafka']
 
     if with_kafka:
-        get_producer_connection(mqtt_server_addr, 15)
+        get_producer_connection(mqtt_server_addr, KAFKA_CONNECTION_TRIES)
 
     kill = Event()
 

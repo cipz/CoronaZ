@@ -4,6 +4,8 @@ from kafka import KafkaProducer
 import json
 import time
 
+KAFKA_CONNECTION_TRIES = 20
+
 
 def thread_zombie_broadcast(kill, zombie, port):
     def send_message(to, message):
@@ -61,6 +63,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
     send_message()
 
     logging.info("server con ended")
+
 
 def get_producer_connection(mqtt_server_addr, tries):
     counter = tries

@@ -12,4 +12,4 @@ WORKDIR /app
 COPY *.py ./
 COPY config.json ./
 
-CMD python3 main.py -s localhost:9092 coronaz ${RUN_ARGS} --config-file ./config.json
+CMD python3 main.py -s kafka:9094 coronaz ${RUN_ARGS} --config-file ./config.json

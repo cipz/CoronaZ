@@ -1,8 +1,10 @@
 version: '3.5'
 
 networks:
-  app_subnet:
-    external: true
+  coronaZ:
+    name: coronaZ
+#   app_subnet:
+#     external: true
 
 services:
 
@@ -14,11 +16,14 @@ services:
       - './coronaz-frontend:/app'
       - '/app/node_modules'
     ports:
-      - 3300:3000
+      - 3000:3000
     depends_on: 
       - coronaz-backend
+    networks:
+      - coronaZ
     
   coronaz-backend:
+    hostname: coronaz-backend
     build:
       context: ./coronaz-backend
       dockerfile: Dockerfile
@@ -27,7 +32,8 @@ services:
     depends_on: 
       - coronaz-db-consumer
       - mongo
-    network_mode: host
+    networks:
+      - coronaZ
 
   zookeeper:
     image: confluentinc/cp-zookeeper
@@ -44,19 +50,21 @@ services:
       options:
         max-size: 500k
         max-file: "3"
+    networks:
+      - coronaZ
 
   kafka:
     image: confluentinc/cp-kafka
     hostname: kafka
     # restart: always
     ports:
-      - "9092:9092"
+      - "9094:9094"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://kafka:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://kafka:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
     logging:
       driver: "json-file"
       options:
@@ -64,10 +72,13 @@ services:
         max-file: "3"
     depends_on:
       - zookeeper
+    networks:
+      - coronaZ
     
   mongo:
     image: mongo
     restart: always
+    hostname: mongo
     environment:
       - MONGO_INITDB_DATABASE=coronaz
       - MONGO_INITDB_ROOT_USERNAME=admin
@@ -76,6 +87,8 @@ services:
       - '27017-27019:27017-27019'
     volumes:
       - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - coronaZ
     
   mongo-express:
     image: mongo-express
@@ -87,6 +100,8 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: pass
     depends_on: 
       - mongo
+    networks:
+      - coronaZ
     
   coronaz-db-consumer:
     build:
@@ -96,28 +111,32 @@ services:
     depends_on: 
       - kafka
       - mongo
-    network_mode: host
+    networks:
+      - coronaZ
 
-#   zombie-test-node-1:
-#     build:
-#       context: ./coronaz-zombie
-#       dockerfile: Dockerfile
-#     depends_on: 
-#       - kafka
-#     network_mode: host
-# 
-#   zombie-test-node-2:
-#     build:
-#       context: ./coronaz-zombie
-#       dockerfile: Dockerfile
-#     depends_on: 
-#       - kafka
-#     network_mode: host
-# 
-#   zombie-test-node-3:
-#     build:
-#       context: ./coronaz-zombie
-#       dockerfile: Dockerfile
-#     depends_on: 
-#       - kafka
-#     network_mode: host
+  # zombie-test-node-1:
+  #   build:
+  #     context: ./coronaz-zombie
+  #     dockerfile: Dockerfile
+  #   depends_on: 
+  #     - kafka
+  #   networks:
+  #     - coronaZ
+
+  # zombie-test-node-2:
+  #   build:
+  #     context: ./coronaz-zombie
+  #     dockerfile: Dockerfile
+  #   depends_on: 
+  #     - kafka
+  #   networks:
+  #     - coronaZ
+
+  # zombie-test-node-3:
+  #   build:
+  #     context: ./coronaz-zombie
+  #     dockerfile: Dockerfile
+  #   depends_on: 
+  #     - kafka
+  #   networks:
+  #     - coronaZ
