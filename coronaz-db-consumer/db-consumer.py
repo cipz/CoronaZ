@@ -51,9 +51,19 @@ for message in consumer:
     message = loads(message.value)
     print('Received {}'.format(message))
 
-    state[message['uuid']] = (message['position'], message['infected'], message['timestamp'])
-
-    counter = counter + 1
+    state[message['uuid']] = {
+        "position" : message['position'],
+        "timestamp" : message['timestamp'], 
+        "infected" : message['infected'],
+        "alive": message['alive']
+    }
+    
+    # If a node dies, trigger a new state
+    if(message['alive']):
+        counter = counter + 1
+    else:
+        counter = aggregation_interval
+    
     # Aggregate based if aggregation interval is reached
     if(counter == aggregation_interval):
         counter = 1

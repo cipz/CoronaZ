@@ -10,21 +10,19 @@ function App() {
 
   const [data, setData] = useState([]);
   const [currentSelection, setCurrentSelection] = useState(0);
+  const [realismMode, setRealismMode] = useState(false);
 
   const handleTick = () => {
-    // Windows
-    // axios.get("http://host.docker.internal:9000/data")
-    //Linux
+    // This has to be localhost as it is run from broser
     axios.get("http://localhost:9000/data")
       .then(response => {
         console.log(response);
         setData(response.data.result);
       })
+      .catch(err => {
+        console.log(console.error(err));
+      })
   };
-
-  const handleChange = (event, newValue) => {
-    setCurrentSelection(newValue);
-  }
 
   useEffect(() => {
     handleTick();
@@ -34,10 +32,21 @@ function App() {
     };
   }, []);
 
+  const handleChange = (event, newValue) => {
+    setCurrentSelection(newValue);
+  }
+
+  const onRealismChange = (event) => {
+    setRealismMode(event.target.checked);
+  }
+
+  var menubar = (data.length != 0)? (<MenuBar realism={realismMode} onRealismChange={onRealismChange} min={0} max={data.length - 1} handleChange={handleChange} node={data[currentSelection]}/>): 
+    (<MenuBar realism={realismMode} onRealismChange={onRealismChange} min={0} max={0} handleChange={(event, newValue) => {}} node={data[currentSelection]}/>);
+
   return (
     <div>
-      <MenuBar min={0} max={data.length - 1} handleChange={handleChange}/>
-      <Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]}/>
+      {menubar}
+      <Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]} realism={realismMode}/>
     </div>
   );
 }
