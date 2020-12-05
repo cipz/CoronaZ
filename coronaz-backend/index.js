@@ -1,7 +1,6 @@
 "use strict";
 
 const http = require('http');
-const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 
