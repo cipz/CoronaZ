@@ -6,4 +6,8 @@ To start the project just execute the script `./init-project.sh` in the reposito
 
 
 # Contributions:
-Coronavirus icon: https://www.flaticon.com/free-icon/coronavirus_2913604?term=coronavirus&page=1&position=20&related_item_id=2913604
+Coronavirus icon: https://www.flaticon.com/authors/freepik
+Zombie icon: https://www.flaticon.com/authors/dinosoftlabs
+Human icon: https://www.flaticon.com/authors/freepik
+Tombstone icon: https://www.flaticon.com/authors/freepik
+

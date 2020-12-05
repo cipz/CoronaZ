@@ -56,13 +56,29 @@ export default function Map(props) {
               if(value.alive) {
                 fill = (value.infected)? "red": "blue";
               }
+              
+              if(props.realism) {
+                let icon = "icons/grave.svg";
+                if(value.alive) {
+                  icon = (value.infected)? "icons/zombie.svg": "icons/human.svg";
+                }
 
-              svg.append("circle")
+                svg.append("svg:image")
+                .attr('x', value.position[0] * scaleFactor - 0.75 * radius * scaleFactor)
+                .attr('y', value.position[1] * scaleFactor - 0.75 * radius * scaleFactor)
+                .attr("preserveAspectRatio", "none")
+                .attr('width', 2 * radius * scaleFactor)
+                .attr('height', 2 * radius * scaleFactor)
+                .attr("xlink:href", icon)
+              } else {
+                svg.append("circle")
                 .attr("cx", value.position[0] * scaleFactor)
                 .attr("cy", value.position[1] * scaleFactor)
                 .attr("r", radius * scaleFactor)
-                .attr("fill", fill);
+                .attr("fill", fill)
+              }
             }
+              
           }) 
         }
     });
