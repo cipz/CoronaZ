@@ -42,25 +42,27 @@ def thread_zombie_listen(kill, zombie, port):
     logging.info("zombie listen ended")
 
 
-def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
-    if with_kafka:
-        producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
-                                 value_serializer=lambda x: json.dumps(x).encode('utf-8'))
-
-    def send_message():
+def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, producer):
+    def send_message(kafka_producer=None):
         data = zombie.get_next_server_message()
         logging.info("Sending message to server: %s" % data)
 
-        if with_kafka:
-            if not producer.bootstrap_connected():
-                get_producer_connection(mqtt_server_addr, 20)
+        if kafka_producer is None or not kafka_producer.bootstrap_connected():
+            kafka_producer = get_producer_connection(mqtt_server_addr, KAFKA_CONNECTION_TRIES)
+            if kafka_producer is None:
+                logging.error('Kafka not reachable, could not send message!')
+                return None
 
-            producer.send(mqtt_queue, value=data)
+        kafka_producer.send(mqtt_queue, value=data)
+        return kafka_producer
 
     while not kill.wait(1):
-        send_message()
+        producer = send_message(producer)
 
-    send_message()
+    producer = send_message(producer)
+
+    if producer is not None:
+        producer.close()
 
     logging.info("server con ended")
 
@@ -68,6 +70,7 @@ def thread_server_con(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka):
 def get_producer_connection(mqtt_server_addr, tries):
     counter = tries
     producer_connection = False
+    producer = None
     while not producer_connection and counter >= 0:
         try:
             producer = KafkaProducer(bootstrap_servers=[mqtt_server_addr],
@@ -75,10 +78,11 @@ def get_producer_connection(mqtt_server_addr, tries):
                                      json.dumps(x).encode('utf-8'))
             producer_connection = True
             logging.info("producer online")
-            producer.close()
         except:
             logging.info("producer not yet online")
             counter -= 1
             time.sleep(10)
     if not producer_connection:
         logging.info("Kafka not reachable!")
+        return None
+    return producer
