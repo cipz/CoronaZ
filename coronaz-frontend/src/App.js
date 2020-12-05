@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react'
+import { makeStyles } from '@material-ui/core/styles';
+
 import MenuBar from "./ui/MenuBar";
 import Map from "./ui/Map";
-
+import {CircularProgress} from '@material-ui/core';
 import * as config from "./config.json";
 
 const axios = require('axios').default;
 
+const useStyles = makeStyles((theme) => ({
+  loading: {
+    padding: 2
+  }
+}));
+
 function App() {
+  const classes = useStyles();
 
   const [data, setData] = useState([]);
   const [currentSelection, setCurrentSelection] = useState(0);
@@ -40,13 +49,15 @@ function App() {
     setRealismMode(event.target.checked);
   }
 
-  var menubar = (data.length != 0)? (<MenuBar realism={realismMode} onRealismChange={onRealismChange} min={0} max={data.length - 1} handleChange={handleChange} node={data[currentSelection]}/>): 
+  var menubar = (data.length !== 0)? (<MenuBar realism={realismMode} onRealismChange={onRealismChange} min={0} max={data.length - 1} handleChange={handleChange} node={data[currentSelection]}/>): 
     (<MenuBar realism={realismMode} onRealismChange={onRealismChange} min={0} max={0} handleChange={(event, newValue) => {}} node={data[currentSelection]}/>);
 
+  var map = (data.length !== 0)? (<Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]} realism={realismMode}/>):
+    (<CircularProgress className={classes.loading}/>);
   return (
     <div>
       {menubar}
-      <Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]} realism={realismMode}/>
+      {map}  
     </div>
   );
 }

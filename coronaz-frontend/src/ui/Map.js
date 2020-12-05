@@ -49,7 +49,7 @@ export default function Map(props) {
         
         if(node) {
           Object.entries(node).forEach(([key, value]) => {
-            if(key != "_id") {
+            if(key !== "_id") {
               console.log(value);
 
               let fill = "gray";
