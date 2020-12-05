@@ -14,12 +14,11 @@ def thread_zombie_broadcast(kill, zombie, port):
         s.sendto(message, (to, port))
 
     while not kill.wait(1):
-        if zombie.has_moved:
-            m = zombie.get_next_broadcast_message()
+        m = zombie.get_next_broadcast_message()
 
-            send_message('255.255.255.255', bytes(m, 'utf-8'))
+        send_message('255.255.255.255', bytes(m, 'utf-8'))
 
-            logging.info("Broadcast to other zombies: %s" % m)
+        logging.info("Broadcast to other zombies: %s" % m)
 
     send_message('127.0.0.1', b'stop')
     logging.debug('Contacted zombie listener to stop')
