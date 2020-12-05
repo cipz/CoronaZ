@@ -2,6 +2,7 @@ version: '3.5'
 
 networks:
   coronaZ:
+    name: coronaZ
 #   app_subnet:
 #     external: true
 

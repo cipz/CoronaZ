@@ -82,9 +82,6 @@ else
 
 fi
 
-printf "\nCreating docker network ... \n"
-docker network create --gateway 172.16.1.1 --subnet 172.16.1.0/24 app_subnet
-
 printf "\nBuilding coronaz-zombie image ... \n"
 docker build coronaz-zombie --tag coronaz_node:latest
 
@@ -118,12 +115,12 @@ do
         1) printf "\nAdding 1 non-infected node\n"
             ((safe_node_count+=1))
             ((total_node_count+=1))
-            docker run -d --net=dsproject_coronaZ --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
+            docker run -d --net=coronaZ --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
             ;;
         2) printf "\nAdd 1 infected node\n"
             ((infected_node_count+=1))
             ((total_node_count+=1))
-            docker run -d --net=dsproject_coronaZ -e RUN_ARGS="-i" --name=coronaz_node_$total_node_count\_infected_$infected_node_count coronaz_node:latest
+            docker run -d --net=coronaZ -e RUN_ARGS="-i" --name=coronaz_node_$total_node_count\_infected_$infected_node_count coronaz_node:latest
             ;;
         3) printf "\nHow many non-infected nodes do you want to add? "
             read -r num_nodes
@@ -131,7 +128,7 @@ do
             do
                 ((safe_node_count+=1))
                 ((total_node_count+=1))
-                docker run -d --net=dsproject_coronaZ --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
+                docker run -d --net=coronaZ --name=coronaz_node_$total_node_count\_safe_$safe_node_count coronaz_node:latest
             done
             printf "\n"
             printf "\nHow many infected nodes do you want to add? "
@@ -140,7 +137,7 @@ do
             do
                 ((infected_node_count+=1))
                 ((total_node_count+=1))
-                docker run -d --net=dsproject_coronaZ -e RUN_ARGS="-i" --name=coronaz_node_$total_node_count\_infected_$infected_node_count coronaz_node:latest
+                docker run -d --net=coronaZ -e RUN_ARGS="-i" --name=coronaz_node_$total_node_count\_infected_$infected_node_count coronaz_node:latest
             done
             ;;
         0) printf "\nExiting ... \n"
