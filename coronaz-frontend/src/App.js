@@ -12,13 +12,14 @@ function App() {
   const [currentSelection, setCurrentSelection] = useState(0);
 
   const handleTick = () => {
-    // Windows
-    // axios.get("http://host.docker.internal:9000/data")
-    //Linux
+    // This has to be localhost as it is run from broser
     axios.get("http://localhost:9000/data")
       .then(response => {
         console.log(response);
         setData(response.data.result);
+      })
+      .catch(err => {
+        console.log(console.error(err));
       })
   };
 
