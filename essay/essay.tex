@@ -104,17 +104,18 @@
 	
 		This can be considered a single component since each node can be spawned separately from one another.
 		
-		\hl{When each node spawns in the map it is placed on a random position.
-		Every second the node will ``move''.
-		When the node moves}
+		When each node spawns in the map it is placed on a random position.
+		Every second the node will ``\textit{move}'' in a random direction, broadcast a message telling its position and \texttt{UUID} (\textit{Universally Unique Identifier}) and listen to the ones that are in broadcast by other nodes.
 		
-		\hl{Nodes introduced into the simulation can be \textit{infected} or \textit{non-infected} (or \textit{safe}).
-		When a node is infected it will keep steady and will not move for a certain amount of time declared in the parameter \texttt{infection\_cooldown}, which defines the number of seconds that the node will stay in place.}
+		Nodes introduced into the simulation can be \textit{infected} or \textit{non-infected} (or \textit{safe}).
+		When a node is infected it will stay in his last position and will not move for a certain amount of time as specified in the parameter \texttt{infection\_cooldown}, which defines the number of seconds that the node will stay in place.
+		After this amount of time, the node will have an ``\textit{immunity period}'' in which it will be able to move again and, if it gets in contact with an infected node, it will not get infected.
+		This time is the same as the \texttt{infection\_cooldown} parameter.
 		
-		In our simulation the nodes can all connect to each other since they are all in the same network and each of them can hear the data sent in broadcast by the others.
+		In our simulation the nodes can all connect to each other since they are all in the same network, as explained in \ref{sec:network}, and each of them can hear the data sent in broadcast by the others.
 		In a more realistic situation nodes would be only capable of hearing the signals of nodes nearby them, like in Fig.\ref{fig:architecture}~where node \textit{A} can communicate only with node \textit{B} and nodes \textit{B}, \textit{C} and \textit{D} are nearby each other enough for them to hear their signal.
 
-		\hl{Here is an example of a message that is sent in broadcast from a node:}
+		Here is an example of a message that is sent in broadcast from a node:
 		\begin{verbatim}
 {  
    "uuid":"ff0a1bda-34b9-11eb-b339 ... ",
@@ -125,24 +126,37 @@
 }  
 		\end{verbatim}
 		
+		After the node exceeds its lifetime in seconds, before exiting will send a last message where the value of \texttt{alive} will be false.
+		This signals the front-end that this node will not have to be displayed anymore.
+		
 		Each node has a unique \textit{UUID} that is generated in Python, using the \texttt{uuid}\cite{uuid}.
 		This is created via a combination of \texttt{MAC} address and the \texttt{IP} address of the machine the script runs on and the timestamp on when the process starts.
 
 		The nodes images are built via a \textit{Dockerfile} that uses the small Linux distribution Alpine to run the Python scripts.
+		The nodes' python scripts are all loaded in the Docker image and the \texttt{main.py} file is executed as \texttt{CMD} when the container starts.
 		This configuration allows to run containers with arguments as well, thus deciding if the node will start as an infected node or as a safe node.
 	
-		The nodes' python scripts are all loaded in the Docker image and
+		The work of the nodes is split along four \textit{threads}:
+		\begin{itemize}
+			\item main thread that starts all the other threads and controls them (main logic of the program);
+			\item broadcasting thread in which the commands for broadcasting the message are executed;
+			\item listening thread that waits for incoming messages;
+			\item Kafka server connection thread that checks if the connection with the Kafka server is still up.
+		\end{itemize}
+		
+		For connectivity the nodes use the \texttt{socket library} and will send UDP messages in broadcast to the unassigned port \texttt{4711} via a random port chosen by the library.
+		
+		The sender's IP address and the port that the message has been sent from can be seen in the logs printed on screen.
+		Setting the debugging at \texttt{INFO} level helps seeing the messages that each node send with one another and that are sent to Kafka.
+		
+		The messages to be sent to the Kafka server are collected via the \texttt{get\_next\_broadcast\_message} method and sent using the \texttt{send\_message} method.
 	
-		The nodes can even be  work with threads:
-		main thread in which the zombie logic is run
-		broadcasting thread which sends broadcast messages
-		listening thread
-		kafka server connection
-		
-		the zombie stores the messages that have to be sent to kafka
-		
-		when a new message is sent the function getnextmessage is called and returns a json string that is sent to kafka
-
+%		\begin{figure}[htbp]
+%			\centerline{\includegraphics[width=\linewidth]{img/algorithm.png}}
+%			\caption{Full algorithm of a node.}
+%			\label{fig:algorithm}
+%		\end{figure}
+	
 	\subsection{MQTT broker}	
 	
 		Apache Kafka is composed by the Kafka container and the Zookeeper container.
@@ -152,32 +166,68 @@
 		The \textit{topic}, in our code, used by the nodes is ``\textit{coronaz}''.
 		This will contain all the information send by the nodes to the broker, which will later forward them to the consumer when it asks for them.
 		
-		\hl{Here is an example of a message that is sent to the broker:}
+		Here is an example of a message that is sent to the broker:
 		\begin{verbatim}
-tmp
-tmp
-tmp
+{
+  "uuid": "5603b252-36de-11eb ... ",
+  "position": [
+      72,
+      33
+    ],
+  "infected": false,
+  "timestamp": "2020-12-05 09:43 ... ",
+  "alive": true,
+  "contacts": [
+    {
+      "uuid": "563eafe6-36de-11eb ... ",
+      "timestamp": "2020-12-05 09:43 ... "
+    },
+    {
+      "uuid": "56fd5d12-36de-11eb ... ",
+      "timestamp": "2020-12-05 09:43 ... "
+    },
+    {
+      "uuid": "567a64c7-36de-11eb ... ",
+      "timestamp": "2020-12-05 09:43 ... "
+    },
+    {
+      "uuid": "56b292fc-36de-11eb ... ",
+      "timestamp": "2020-12-05 09:43 ... "
+    },
+    {
+      "uuid": "575030c3-36de-11eb ... ",
+      "timestamp": "2020-12-05 09:43 ... "
+    },
+    {
+      "uuid": "563eafe6-36de-11eb ... ",
+      "timestamp": "2020-12-05 09:43 ... "
+    }
+  ]
+}
 		\end{verbatim}
 		
+		If a message is received from the same node twice then, the receiving node will discard the first message that arrived.
 	
 	\subsection{DB consumer}
 	
 		The DB consumer can be considered as a single entity since it is independent both from Kafka and from Mongo.
 		The consumer is subscribed to the Kafka topic that contains the new messages from the nodes, in our case ``\textit{coronaz}''.
-		When a new message arrives, the consumer gets it and, every ten messages, it aggregates them in a \texttt{json} that will be sent to the MongoDB database.
+		When a new message arrives, the consumer gets it and, every ten messages (or when a node dies), it aggregates them in a \texttt{json} that will be sent to the MongoDB database.
 	
 	\subsection{Database}
 	
 		As the other components, the database runs in a Docker container.
 		
 		It accepts and stores incoming data from the Consumer.
-		The database is accessible from the front-end, which will request data every second in order to always display fresh information.
+		The database is accessed by the back-end, which will forward the data to the front-end, refreshed every second in order to always display the latest status.
 	
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=\linewidth]{img/database.png}}
 			\caption{CoronaZ database structure.}
 			\label{fig:database}
 		\end{figure}
+	
+		In the database, each column is the \texttt{UUID} the nodes and represents the latest update of the node.
 	
 	\subsection{Back-end}
 	
@@ -194,9 +244,17 @@ tmp
 			\label{fig:front-end}
 		\end{figure}
 	
-\section{Docker networking}
+		Safe nodes are colored blue while infected nodes are red.
+		
+		Using the slider on top of the page will show the steps of the simulation and the movements made by the nodes.
+	
+\section{Docker networking}\label{sec:network}
 
-	Since this project massively uses Docker containers, there is a docker network underneath it that connects all the components.
+	Since this project massively uses Docker containers, there is a docker network called \texttt{coronaZ}, set in the \texttt{docker-compose.yml} file, underneath it that connects all the components.
+	
+	This network allows each node to get a new IP address and to have their own ports for broadcasting and listening.
+	
+	Setting the network mode in another way, for example with \texttt{network mode:host}, would have created problems IP assignment and in the ports.
 	
 \section{Scalability and fault tolerance}
 
@@ -246,10 +304,10 @@ tmp
 	\begin{itemize}
 		\item ``\textit{field\_width}'': width of the map;
 		\item ``\textit{field\_height}'': height of the map;
-		\item ``\textit{scale\_factor}'':
-		\item ``\textit{zombie\_lifetime}'': lifetime in seconds of the zombies;
-		\item ``\textit{infection\_radius}'':
-		\item ``\textit{infection\_cooldown}'': ``\textit{cooldown}'' period in seconds in which the nodes stand in order
+		\item ``\textit{scale\_factor}'': scales the map and the nodes in order to be viewed better in the front-end;
+		\item ``\textit{zombie\_lifetime}'': lifetime in seconds of the nodes;
+		\item ``\textit{infection\_radius}'': the distance that the nodes can consider to infect other nodes;
+		\item ``\textit{infection\_cooldown}'': ``\textit{cooldown}'' period in seconds in which the nodes stand in order to ``\textit{cure}''. This value is also used as an ``\textit{immunity period}'' in which the node cannot get infected.
 	\end{itemize}
 	
 	\begin{figure}[htbp]
