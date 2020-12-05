@@ -33,8 +33,8 @@ export default function Map(props) {
 
         var svg = d3.select(ref.current)
         .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", width * scaleFactor)
+        .attr("height", height * scaleFactor);
         
         if(node) {
           Object.entries(node).forEach(([key, value]) => {
