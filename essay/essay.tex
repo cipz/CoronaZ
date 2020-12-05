@@ -34,11 +34,11 @@
 	\textit{stefanciprian.voinea@studenti.unipd.it}
 	\and
 	\IEEEauthorblockN{Stefan Vladov}
-	\IEEEauthorblockA{University}
+	\IEEEauthorblockA{Technical University of Munich}
 	\textit{mail}
 	\and
 	\IEEEauthorblockN{Fabian Rensing}
-	\IEEEauthorblockA{University}
+	\IEEEauthorblockA{Paderborn University}
 	\textit{mail}
 }
 
@@ -78,8 +78,8 @@
 		\item \textit{MQTT Broker}: we chose \textit{Apache Kafka} as broker for our project since it is one of the most used brokers in the market and it is has a large community that supports the project. Apache Kafka also handles well scaling and integration with other systems;
 		\item \textit{Containers}: we chose to use \textit{Docker} and \textit{docker-compose} given the easiness of constructing and spawning nodes. As explained in \ref{sec:architecture}, we have a \texttt{docker-compose.yml} that handles that base components such as the broker and the database;
 		\item \textit{Database}: we chose \textit{MongoDB} for the scalability and the ability to adapt to new data formats. Also because some group components had previous experience with it;
-		\item \textit{Back-end}: we chose \textit{NodeJS} since, like for the database, some group components had previous experience with it.
-		\item \textit{Front-end}: 
+		\item \textit{Back-end}: we chose \textit{NodeJS} since, like for the database, some group components had previous experience with it;
+		\item \textit{Front-end}: as for other technical choices, \textit{ReactJS} was chosen given the familiarity of some group members with \textit{Javascript} this front-end UI library.
 	\end{itemize}
 
 	\subsection{System requirements}
@@ -128,7 +128,20 @@
 		Each node has a unique \textit{UUID} that is generated in Python, using the \texttt{uuid}\cite{uuid}.
 		This is created via a combination of \texttt{MAC} address and the \texttt{IP} address of the machine the script runs on and the timestamp on when the process starts.
 
-		\hl{threads}
+		The nodes images are built via a \textit{Dockerfile} that uses the small Linux distribution Alpine to run the Python scripts.
+		This configuration allows to run containers with arguments as well, thus deciding if the node will start as an infected node or as a safe node.
+	
+		The nodes' python scripts are all loaded in the Docker image and
+	
+		The nodes can even be  work with threads:
+		main thread in which the zombie logic is run
+		broadcasting thread which sends broadcast messages
+		listening thread
+		kafka server connection
+		
+		the zombie stores the messages that have to be sent to kafka
+		
+		when a new message is sent the function getnextmessage is called and returns a json string that is sent to kafka
 
 	\subsection{MQTT broker}	
 	
@@ -254,6 +267,10 @@ tmp
 		\caption{\hl{CoronaZ simulation at time X+Y+Z.}}
 		\label{fig:sim_3}
 	\end{figure}
+
+\section{Performance evaluation}
+
+	
 
 \section{Future work}\label{sec:future_work}
 
