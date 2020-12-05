@@ -60,7 +60,7 @@
 
 	This brief paper describes \textit{CoronaZ}, a project for the Distributed Systems course at the \textit{University of Helsinki}.
 	
-	All the code of the project is publicly available on GitHub: \textit{\url{https://github.com/cipz/CoronaZ/}}.
+	All the code of the project is publicly available on GitHub repository\cite{coronaz_repo}.
 	
 	This project simulates a contact tracing application where each node represents a person (or a unique device attached to someone) that send signals to each other when in range and communicate the data collected to a server using the \textit{publish-subscribe} pattern.
 	The server, called \textit{broker}, can then be polled by a node called \textit{consumer} that will send the data to a database.
@@ -78,7 +78,8 @@
 		\item \textit{MQTT Broker}: we chose \textit{Apache Kafka} as broker for our project since it is one of the most used brokers in the market and it is has a large community that supports the project. Apache Kafka also handles well scaling and integration with other systems;
 		\item \textit{Containers}: we chose to use \textit{Docker} and \textit{docker-compose} given the easiness of constructing and spawning nodes. As explained in \ref{sec:architecture}, we have a \texttt{docker-compose.yml} that handles that base components such as the broker and the database;
 		\item \textit{Database}: we chose \textit{MongoDB} for the scalability and the ability to adapt to new data formats. Also because some group components had previous experience with it;
-		\item \textit{Front-end}: we chose \textit{NodeJS} since, like for the database, some group components had previous experience with it.
+		\item \textit{Back-end}: we chose \textit{NodeJS} since, like for the database, some group components had previous experience with it.
+		\item \textit{Front-end}: 
 	\end{itemize}
 
 	\subsection{System requirements}
@@ -86,7 +87,7 @@
 		The system requirements for this project are simple:
 		\begin{itemize}
 			\item \textit{Docker} and \textit{docker-compose};
-			\item Ubuntu or another Linux system for starting the project using the \textit{init-project.sh} bash script;
+			\item Ubuntu or another Linux system with \texttt{jq} installed for starting the project using the \textit{init-project.sh} bash script;
 		\end{itemize}
 
 \section{Architecture}\label{sec:architecture}
@@ -116,13 +117,18 @@
 		\hl{Here is an example of a message that is sent in broadcast from a node:}
 		\begin{verbatim}
 {  
-   "uuid":"ff0a1bda-34b9-11eb-b339-98fa9b2194f9",
+   "uuid":"ff0a1bda-34b9-11eb-b339 ... ",
    "position":[1, 5],
    "infected":false,
-   "timestamp":"2020-12-02 16:19:36.945151",
+   "timestamp":"2020-12-02 16:19 ... ",
    "alive":true
 }  
 		\end{verbatim}
+		
+		Each node has a unique \textit{UUID} that is generated in Python, using the \texttt{uuid}\cite{uuid}.
+		This is created via a combination of \texttt{MAC} address and the \texttt{IP} address of the machine the script runs on and the timestamp on when the process starts.
+
+		\hl{threads}
 
 	\subsection{MQTT broker}	
 	
@@ -160,9 +166,13 @@ tmp
 			\label{fig:database}
 		\end{figure}
 	
-	\subsection{Front-end}
+	\subsection{Back-end}
 	
-		The front-end of the project, programmed using NodeJS, shows the evolution of the system and the simulations.
+		For the back-end of the project, \textit{NodeJS} does \hl{...}
+	
+	\subsection{Front-end}
+
+		The front-end of the project, programmed using \textit{React}, shows the evolution of the system and the simulations.
 		It shows the movement of the nodes in the map, along with which one has been infected or not.
 		
 		\begin{figure}[htbp]
@@ -170,18 +180,31 @@ tmp
 			\caption{CoronaZ front-end.}
 			\label{fig:front-end}
 		\end{figure}
+	
+\section{Docker networking}
 
+	Since this project massively uses Docker containers, there is a docker network underneath it that connects all the components.
+	
 \section{Scalability and fault tolerance}
 
 	We have tested the scalability and the fault tolerance of the project in the following ways:
 	
 	\begin{itemize}
+		
 		\item \hl{\textit{unexpectedly shutting down the MongoDB database}:}
+		
 		\item \hl{\textit{unexpectedly shutting down the consumer}:}
+		
 		\item \hl{\textit{unexpectedly shutting down the front end}:}
+		
 		\item \hl{\textit{unexpectedly shutting down the broker}:}
-		\item \hl{\textit{adding more nodes}:}
+		
+		\item \textit{adding more nodes}: when a node is added it will start communicating with the other nodes already in the system and it will start sending messages to the broker.
+		
 	\end{itemize}
+
+	In general for the errors that can be felt in the front-end, such as the database not responding or the back-end server not responding, the user does not really need to know what exact component went down.
+	This is also for security reasons in case a \textit{malicious} user wants to find the vulnerabilities; without the specific logs it is harder for him to find the exact breaking point of the project.
 	
 \section{Simulation}\label{sec:simulation}
 
@@ -206,19 +229,29 @@ tmp
     }
 	\end{verbatim}
 	
+	These parameters stand for:
+	\begin{itemize}
+		\item ``\textit{field\_width}'': width of the map;
+		\item ``\textit{field\_height}'': height of the map;
+		\item ``\textit{scale\_factor}'':
+		\item ``\textit{zombie\_lifetime}'': lifetime in seconds of the zombies;
+		\item ``\textit{infection\_radius}'':
+		\item ``\textit{infection\_cooldown}'': ``\textit{cooldown}'' period in seconds in which the nodes stand in order
+	\end{itemize}
+	
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_1.png}}
-		\caption{CoronaZ simulation at time X.}
+		\caption{\hl{CoronaZ simulation at time X.}}
 		\label{fig:sim_1}
 	\end{figure}
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_2.png}}
-		\caption{CoronaZ simulation at time X+Y.}
+		\caption{\hl{CoronaZ simulation at time X+Y.}}
 		\label{fig:sim_2}
 	\end{figure}
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_3.png}}
-		\caption{CoronaZ simulation at time X+Y+Z.}
+		\caption{\hl{CoronaZ simulation at time X+Y+Z.}}
 		\label{fig:sim_3}
 	\end{figure}
 
@@ -228,8 +261,22 @@ tmp
 	
 	There are various improvements that can be done to make CoronaZ a more interesting and stable simulator, we will tackle them based on the areas defined in \ref{sec:architecture}.
 	
+	\hl{IMPROVEMENTS}
+	
 \section{Conclusions}\label{sec:conclusions}
 
 	This project represents a simulation of a contact tracing application where each node that spawns in out network communicates its position to the others in range and will send the data collected to a central server with the \textit{publish-subscribe} pattern.
+
+\begin{thebibliography}{00}
+	
+	\bibitem{coronaz_repo}
+		\textit{CoronaZ repository:}\\
+		\url{https://github.com/cipz/CoronaZ/}
+	
+	\bibitem{uuid}
+		\textit{\texttt{uuid} — UUID objects according to RFC 4122:}\\
+		\url{https://docs.python.org/3.8/library/uuid.html}
+		
+\end{thebibliography}
 
 \end{document}
