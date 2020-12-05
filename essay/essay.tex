@@ -364,7 +364,13 @@
 
 \section{Performance evaluation}\label{sec:performance}
 
-	Length in bytes of a broadcasted message: 148B
+	A \texttt{simulation.pcapng} file is present in the essay folder and contains part of a simulation for the system system running.
+
+	From this file, various message lengths can be seen, for example: the lenght in bytes of a message sent in broadcasted by each node is \textit{148B} (just the payload, \textit{189B} with headers).
+	For the messages sent to the the server, the minimum size is the \textit{148B}, the rest depends on the number of contacts the node had.
+	
+	For a simulation with twenty nodes, each of them sends \hl{X} messages in broadcast a second.
+	In the ``\textit{worst case scenario}'' where all the nodes are in infecting range, the lenght of the message sent to the server would be \textit{2.41KB} (\textit{2.49KB} with the payloads).
 
 \section{Future work}\label{sec:future_work}
 
@@ -372,7 +378,32 @@
 	
 	There are various improvements that can be done to make CoronaZ a more interesting and stable simulator, we will tackle them based on the areas defined in \ref{sec:architecture}.
 	
-	\hl{IMPROVEMENTS}
+	\subsection{Nodes}
+	
+		\hl{Nodes logic can be improved by }
+	
+	\subsection{MQTT broker}
+		
+		In order to allow for a better network performance, scaling the broker would be the best option.
+		A dynamic scale rule could be created and the server replicas can be hidden behind a proxy.
+		
+		This would not only help improving the performance of the network but also by adding fault tolerance in case one of the replicas fail.
+		
+	\subsection{DB consumer}
+		
+		As per the broker server, scaling the DB consumer node and making each node read from a separate queu or a separate server would improve network performance and fault tolerance.
+	
+	\subsection{Database}
+	
+		\hl{TODO}
+	
+	\subsection{Back-end}
+		
+		\hl{TODO}
+	
+	\subsection{Front-end}
+	
+		\hl{TODO}
 	
 \section{Conclusions}\label{sec:conclusions}
 
