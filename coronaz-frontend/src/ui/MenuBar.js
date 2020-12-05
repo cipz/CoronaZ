@@ -33,9 +33,9 @@ export default function MenuBar(props) {
 
   if(props.node) {
     total_nodes = Object.entries(props.node).length - 1;
-    zombies = Object.entries(props.node).filter(([key, value]) => key != "_id" && value.alive && value.infected).length;
-    deaths = Object.entries(props.node).filter(([key, value]) => key != "_id" && !value.alive).length;
-    inf_deaths = Object.entries(props.node).filter(([key, value]) => key != "_id" && !value.alive && value.infected).length;
+    zombies = Object.entries(props.node).filter(([key, value]) => key !== "_id" && value.alive && value.infected).length;
+    deaths = Object.entries(props.node).filter(([key, value]) => key !== "_id" && !value.alive).length;
+    inf_deaths = Object.entries(props.node).filter(([key, value]) => key !== "_id" && !value.alive && value.infected).length;
   }
 
   return (
