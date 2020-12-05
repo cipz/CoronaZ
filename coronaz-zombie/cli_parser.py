@@ -30,7 +30,6 @@ def get_cli_arguments():
                         help='Number of steps to be performed in automatic mode. Default = %s' % LIFETIME)
     parser.add_argument('--infection-cooldown', type=int, metavar='X', default=COOLDOWN,
                         help='Time it takes to heal and become not infected anymore')
-    parser.add_argument('--no-kafka', action='store_true')
     parser.add_argument('--config-file', type=str, metavar='JSON_FILE',
                         help='Json file with configuration arguments')
 
