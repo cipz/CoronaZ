@@ -34,9 +34,11 @@ function App() {
     };
   }, []);
 
+  var menubar = (data.length != 0)? (<MenuBar min={0} max={data.length - 1} handleChange={handleChange}/>): <MenuBar min={0} max={0} handleChange={(event, newValue) => {}}/>
+
   return (
     <div>
-      <MenuBar min={0} max={data.length - 1} handleChange={handleChange}/>
+      {menubar}
       <Map height={config.field_height} width={config.field_width} radius={config.infection_radius} scale={config.scale_factor} node={data[currentSelection]}/>
     </div>
   );
