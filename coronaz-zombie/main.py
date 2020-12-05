@@ -1,8 +1,5 @@
 import logging
 from threading import Thread, Event
-from kafka import KafkaProducer
-from json import dumps
-import time
 
 from zombie import Zombie
 from cli_parser import get_cli_arguments
@@ -17,17 +14,15 @@ def main(args):
 
     mqtt_server_addr = args['server'][0]
     mqtt_queue = args['server'][1]
-    with_kafka = not args['no_kafka']
 
-    if with_kafka:
-        get_producer_connection(mqtt_server_addr, KAFKA_CONNECTION_TRIES)
+    producer = get_producer_connection(mqtt_server_addr, KAFKA_CONNECTION_TRIES)
 
     kill = Event()
 
     zombie_broadcast = Thread(target=thread_zombie_broadcast, args=(kill, zombie, args['zombie_port']))
     zombie_listen = Thread(target=thread_zombie_listen, args=(kill, zombie, args['zombie_port']))
 
-    server_con_thread = Thread(target=thread_server_con, args=(kill, zombie, mqtt_server_addr, mqtt_queue, with_kafka))
+    server_con_thread = Thread(target=thread_server_con, args=(kill, zombie, mqtt_server_addr, mqtt_queue, producer))
 
     zombie_broadcast.start()
     zombie_listen.start()
