@@ -1,8 +1,8 @@
 from kafka import KafkaConsumer
 from json import loads
 from time import sleep
-import os
 import pymongo
+import logging
 
 print("Starting db-consumer.py")
 
@@ -36,8 +36,6 @@ def get_consumer_connection():
 
 # Linux
 client = pymongo.MongoClient('mongo', username='admin', password='pass')
-# Windows
-# client = pymongo.MongoClient('host.docker.internal:27017', username='admin', password='pass')
 collection = client.coronaz.coronaz
 
 print("connected to mongo")
@@ -70,6 +68,19 @@ for message in consumer:
     # Aggregate based if aggregation interval is reached
     if (counter == aggregation_interval):
         counter = 1
+        try:
+            client.server_info()
+        except:
+            mongo_connection = False
+            while not mongo_connection:
+                try:
+                    client = pymongo.MongoClient('mongo', username='admin', password='pass')
+                    client.server_info()
+                    collection = client.coronaz.coronaz
+                    mongo_connection = True
+                    logging.debug('reconnected to mongo')
+                except:
+                    logging.debug('Mongo not reachable')
         collection.update({'_id': aggregation_id}, state, upsert=True)
         aggregation_id = aggregation_id + 1
         print('{} added to {}'.format(state, collection))
