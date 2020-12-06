@@ -1,8 +1,8 @@
 {
-    "field_width" : 100,
-    "field_height" : 100,
-    "scale_factor" : 5,
-    "zombie_lifetime" : 120,
-    "infection_radius" : 2,
-    "infection_cooldown" : 15
+  "field_width": 100,
+  "field_height": 100,
+  "scale_factor": 5,
+  "zombie_lifetime": 120,
+  "infection_radius": 200,
+  "infection_cooldown": 15
 }
