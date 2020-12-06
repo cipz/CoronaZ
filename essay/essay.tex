@@ -102,7 +102,7 @@
 	The server, called \textit{broker}, can then be polled by a node called \textit{consumer} that will send the data to a database.
 	A front-end application then requests this data and displays the movement and the latest updates via the browser.
 	
-	The idea came from simulating this kind of movements with Arduino boards capable of communicating between them using the \textit{nrf24l01} and to the broker with \textit{esp8266}.
+	The idea came from simulating this kind of movements with Arduino boards capable of communicating between themselves using the \textit{nrf24l01} and to the broker with \textit{esp8266}.
 	Unfortunately this was not possible given the relatively strict amount of time that each of the students involved could dedicate to the project and the waiting time to get the necessary hardware.
 
 \section{Technological choices}\label{sec:technological_choices}
@@ -113,9 +113,9 @@
 		\item \textit{Programming language}: we chose Python because it is a fast programming language for creating prototypes. Also all group members are fluent with Python;
 		\item \textit{MQTT Broker}: we chose \textit{Apache Kafka} as broker for our project since it is one of the most used brokers in the market and it is has a large community that supports the project. Apache Kafka also handles well scaling and integration with other systems;
 		\item \textit{Containers}: we chose to use \textit{Docker} and \textit{docker-compose} given the easiness of constructing and spawning nodes. As explained in \ref{sec:architecture}, we have a \texttt{docker-compose.yml} that handles that base components such as the broker and the database;
-		\item \textit{Database}: we chose \textit{MongoDB} for the scalability and the ability to adapt to new data formats. Also because some group members had previous experience with it;
-		\item \textit{Back-end}: we chose \textit{NodeJS} since, like for the database, some group members had previous experience with it;
-		\item \textit{Front-end}: as for other technical choices, \textit{ReactJS} was chosen given the familiarity of some group members with \textit{Javascript} this front-end UI library.
+		\item \textit{Database}: we chose \textit{MongoDB} for its high scalability and ease of use. Additionally, its dynamic schemas would allows us to be very flexible with our data model;
+		\item \textit{Back-end}: we chose \textit{NodeJS} and \textit{Express}, as it is a popular back-end for web applications, and some group members had prior experience
+		\item \textit{Front-end}: we chose \textit{React} for its fast development speed and familiarity of some group members with it.
 	\end{itemize}
 
 	\subsection{System requirements}
@@ -123,12 +123,12 @@
 		The system requirements for this project are simple:
 		\begin{itemize}
 			\item \textit{Docker} and \textit{docker-compose};
-			\item Ubuntu or another Linux system with \texttt{jq} installed for starting the project using the \textit{init-project.sh} bash script;
+			\item Ubuntu or another Linux system with \texttt{jq} installed for starting the project using the \textit{init-project.sh} bash script(partly working with \textit{git bash} on Windows);
 		\end{itemize}
 
 \section{Architecture}\label{sec:architecture}
 	
-	We can divide our project in four major areas: \textit{nodes}, \textit{broker}, \textit{DB consumer}, \textit{database}, \textit{front-end}.
+	We can divide our project in four major areas: \textit{nodes}, \textit{broker}, \textit{DB consumer}, \textit{database}, \textit{back-end} and \textit{front-end}.
 
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/coronaz.png}}
@@ -149,7 +149,7 @@
 		This time is the same as the \texttt{infection\_cooldown} parameter.
 		
 		In a gamification perspective, the nodes in our system are also called \textit{humans} and \textit{zombies}. 
-		Humans are the nodes considered \textit{safe} while the \textit{zombies} are the nodes that have \textit{infected}.
+		Humans are the nodes considered \textit{safe} while the \textit{zombies} are the nodes that have been \textit{infected}.
 		
 		In our simulation the nodes can all connect to each other since they are all in the same network, as explained in \ref{sec:network}, and each of them can hear the data sent in broadcast by the others.
 		In a more realistic situation nodes would be only capable of hearing the signals of nodes nearby them, like in Fig.\ref{fig:architecture}~where node \textit{A} can communicate only with node \textit{B} and nodes \textit{B}, \textit{C} and \textit{D} are nearby each other enough for them to hear their signal.
@@ -266,20 +266,17 @@
 			\label{fig:database}
 		\end{figure}
 	
-		In the database, each column is the \texttt{UUID} the nodes and represents the latest update of the node.
+		In the database, each document is map with the \texttt{UUID} of the nodes as a key and the value represents the latest update of the node(from the last message).
 	
 	\subsection{Back-end}
 	
-		\hl{TODO}
-		
-		For the back-end of the project, \textit{NodeJS} does \hl{...}
+		For the back-end of the project, \textit{NodeJS} provides a single REST endpoint for the front-end. This is \textit{GET /data}, which connects to the MongoDB database and queries all the documents containing the state of the nodes.
 	
 	\subsection{Front-end}
 
-		\hl{TODO}
-
-		The front-end of the project, programmed using \textit{React}, shows the evolution of the system and the simulations.
-		It shows the movement of the nodes in the map, along with which one has been infected or not.
+		The front-end of the project, built with \textit{React} and \textit{MaterialUI}, shows the evolution of the system and the simulations.
+		
+		A slider allows the user to select one of the queried states from the database, which will be then visualized on the map underneath. Moreover, this will also update the statistics on the top of the page. Realism mode switches between using circles or icons.
 		
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=\linewidth]{img/frontend.png}}
@@ -287,17 +284,18 @@
 			\label{fig:front-end}
 		\end{figure}
 	
-		Safe nodes are colored blue while infected nodes are red.
+		Safe nodes are colored in blue while infected nodes are red. Dead nodes are gray. 
 		
-		Using the slider on top of the page will show the steps of the simulation and the movements made by the nodes.
+		The statistics are the following: "Total nodes", "Zombies", "Deaths" and "Dead zombies" which respectively represent the total number of nodes, number of infected nodes, number of dead nodes and number of nodes that died infected.
+		
 	
 \section{Docker networking}\label{sec:network}
 
-	Since this project massively uses Docker containers, there is a docker network called \texttt{coronaZ}, set in the \texttt{docker-compose.yml} file, underneath it that connects all the components.
+	Since this project utilizes Docker containers, there is a docker network called \texttt{coronaZ}, defined in the \texttt{docker-compose.yml} file, which connects all the components.
 	
 	This network allows each node to get a new IP address and to have their own ports for broadcasting and listening.
 	
-	Setting the network mode in another way, for example with \texttt{network mode:host}, would have created problems IP assignment and in the ports.
+	Setting the network mode in another way, for example with \texttt{network mode:host} is inadvisable due to operability issues between docker for Windows and Linux, as well as creating problems with IP and port assignment.
 	
 \section{Scalability and fault tolerance}\label{sec:scalability}
 
@@ -331,11 +329,11 @@
 	In general for the errors that can be felt in the front-end, such as the database not responding or the back-end server not responding, the user does not really need to know what exact component went down.
 	This is also for security reasons in case a \textit{malicious} user wants to find the vulnerabilities; without the specific logs it is harder for him to find the exact breaking point of the project.
 	
-	Also the user should also not know that there are various components behind that make up for the whole network, he just sees the system as one.
+	Also the user does not need to concern himself with the various components which make up the whole network, he perceives the system as one entity.
 	
 \section{Simulation}\label{sec:simulation}
 
-	To start the project we have made a \textit{init-project.sh} script that asks the parameters with which the simulation will take place, that creates the docker network, executes the \texttt{docker-compose} (\texttt{up} and \texttt{down}) commands and manages (and spawns) the number of nodes.
+	To start the project we have made a \textit{init-project.sh} script that asks the parameters with which the simulation will take place, then creates the docker network, executes the \texttt{docker-compose} (\texttt{up} and \texttt{down}) commands and manages (and spawns) the number of nodes.
 	
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/script.png}}
@@ -368,17 +366,17 @@
 	
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_1.png}}
-		\caption{\hl{CoronaZ simulation at time X.}}
+		\caption{CoronaZ simulation at start.}
 		\label{fig:sim_1}
 	\end{figure}
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_2.png}}
-		\caption{\hl{CoronaZ simulation at time X+Y.}}
+		\caption{CoronaZ simulation when first node is cured.}
 		\label{fig:sim_2}
 	\end{figure}
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_3.png}}
-		\caption{\hl{CoronaZ simulation at time X+Y+Z.}}
+		\caption{CoronaZ simulation when nodes die(from natural causes).}
 		\label{fig:sim_3}
 	\end{figure}
 
@@ -386,7 +384,7 @@
 
 	A ``\texttt{simulation.pcapng}'' file is present in the essay folder and contains part of a simulation for the system system running.
 
-	From this file, various message lengths can be seen, for example: the lenght in bytes of a message sent in broadcasted by each node is \textit{148B} (just the payload, \textit{189B} with headers).
+	From this file, various message lengths can be seen, for example: the length in bytes of a message sent in broadcasted by each node is \textit{148B} (just the payload, \textit{189B} with headers).
 	For the messages sent to the the server by the nodes, the minimum size is \textit{148B} (\textit{189B} with headers), the rest depends on the number of contacts the node had.
 	
 	For a simulation with twenty nodes, each of them sends one message in broadcast a second, which means 189B.
@@ -425,15 +423,19 @@
 	
 	\subsection{Database}
 	
-		\hl{TODO}
+		Currently the database only holds one simulation, but it can be expanded to hold multiple ones, preferably as different MongoDB collections.
+		
+		As MongoDB is very configurable one could also tweak factors such as replication.
 	
 	\subsection{Back-end}
 		
-		\hl{TODO}
+		Currently the back-end only supports one end-point. An important improvement would be to allow the front-end to make intelligent queries, for example only sending the newest states instead of all of them to reduce bandwidth consumption. 
+		
+		Additionally, more complex functions such as selecting a specific simulation or user profiles can be implemented.
 	
 	\subsection{Front-end}
 	
-		\hl{TODO}
+		The front-end is feature complete in terms of our project scope. A further improvement could be an option to select a specific simulation or having a user profile.
 	
 \section{Conclusions}\label{sec:conclusions}
 
