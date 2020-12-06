@@ -71,7 +71,7 @@
 	\and
 	\IEEEauthorblockN{Stefan Vladov}
 	\IEEEauthorblockA{Technical University of Munich}
-	\textit{mail}
+	\textit{stefan.vladov@tum.de}
 	\and
 	\IEEEauthorblockN{Fabian Rensing}
 	\IEEEauthorblockA{Paderborn University}
@@ -267,16 +267,20 @@
 	
 	\subsection{Back-end}
 	
+		\hl{TODO}
+		
 		For the back-end of the project, \textit{NodeJS} does \hl{...}
 	
 	\subsection{Front-end}
+
+		\hl{TODO}
 
 		The front-end of the project, programmed using \textit{React}, shows the evolution of the system and the simulations.
 		It shows the movement of the nodes in the map, along with which one has been infected or not.
 		
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=\linewidth]{img/frontend.png}}
-			\caption{CoronaZ front-end.}
+			\caption{\hl{CoronaZ front-end.}}
 			\label{fig:front-end}
 		\end{figure}
 	
@@ -364,13 +368,19 @@
 
 \section{Performance evaluation}\label{sec:performance}
 
-	A \texttt{simulation.pcapng} file is present in the essay folder and contains part of a simulation for the system system running.
+	A ``\texttt{simulation.pcapng}'' file is present in the essay folder and contains part of a simulation for the system system running.
 
 	From this file, various message lengths can be seen, for example: the lenght in bytes of a message sent in broadcasted by each node is \textit{148B} (just the payload, \textit{189B} with headers).
-	For the messages sent to the the server, the minimum size is the \textit{148B}, the rest depends on the number of contacts the node had.
+	For the messages sent to the the server by the nodes, the minimum size is \textit{148B} (\textit{189B} with headers), the rest depends on the number of contacts the node had.
 	
-	For a simulation with twenty nodes, each of them sends \hl{X} messages in broadcast a second.
-	In the ``\textit{worst case scenario}'' where all the nodes are in infecting range, the lenght of the message sent to the server would be \textit{2.41KB} (\textit{2.49KB} with the payloads).
+	For a simulation with twenty nodes, each of them sends one message in broadcast a second, which means 189B.
+	In the ``\textit{worst case scenario}'' where all the nodes are in infecting range, the lenght of the message sent to the server would be \textit{2.49KB}.
+	
+	So just one node sends $189~B + 2.49~KB = 2.68~KB$ each second, this would mean that for a simulation of $120$ seconds, the total amount of data sent by the nodes is $2.68~KB*120*20 = 321.6~KB*20 = 6.43~MB$.
+	
+	Latency does not represent an obstacle in our system since each node stores the messages that need to be sent to the server and the data handled is not time sensitive as per other \textit{real-time} applications.
+	
+	Network performances for the nodes are discussed in \ref{subsec:nodes_improvements}.
 
 \section{Future work}\label{sec:future_work}
 
@@ -378,9 +388,13 @@
 	
 	There are various improvements that can be done to make CoronaZ a more interesting and stable simulator, we will tackle them based on the areas defined in \ref{sec:architecture}.
 	
-	\subsection{Nodes}
+	\subsection{Nodes}\label{subsec:nodes_improvements}
 	
-		\hl{Nodes logic can be improved by }
+		Nodes logic can be improved adding a more intelligent behaviour.
+		This would result in better movements on the map and, possibly, avoiding infected nodes.
+		
+		The throughput of the network could be improved by shortening the messages and choosing a different message format (like \textit{differential updates}).
+		This would allow not only to exchange less bytes between the nodes but especially between the nodes and the Kafka server.
 	
 	\subsection{MQTT broker}
 		
@@ -391,7 +405,7 @@
 		
 	\subsection{DB consumer}
 		
-		As per the broker server, scaling the DB consumer node and making each node read from a separate queu or a separate server would improve network performance and fault tolerance.
+		As per the broker server, scaling the DB consumer node and making each node read from a separate queue or a separate server would improve network performance and fault tolerance.
 	
 	\subsection{Database}
 	
@@ -407,14 +421,13 @@
 	
 \section{Conclusions}\label{sec:conclusions}
 
-	This project represents a simulation of a contact tracing application where each node that spawns in out network communicates its position to the others in range and will send the data collected to a central server with the \textit{publish-subscribe} pattern.
+	This project represents a simulation of a contact tracing application where each node that spawns in the network communicates its position to the others in range and will send the data collected to a central server with the \textit{publish-subscribe} pattern.
 	
 	The running system implements the basic goals and functionalities requested in the given programming task sheet.
-	As explained in \ref{sec:scalability} it supports scalability and fault tolerance.
-	The end user of the system can decide how many nodes to add.
-	In \ref{sec:performance} there is the analysis of how the system performs and how much data is sent in the network in the time of the simulation.
+	As explained in \ref{sec:scalability} it supports scalability and fault tolerance, while the end user of the system can decide how many nodes to add, thus scaling the system \textit{horizontally}.
+	In \ref{sec:performance} there is the analysis of how the system performs and how much data is sent in the network during the simulation.
 	Improvements, both in the system's architecture and it's performance are discussed in \ref{sec:future_work}.
-	This project hows these three characteristics: \textit{naming and node discovery}, \textit{synchronization and consistency}, \textit{fault tolerance}.
+	This project has these three characteristics: \textit{naming and node discovery}, \textit{synchronization and consistency} and \textit{fault tolerance}.
 
 \begin{thebibliography}{00}
 	
