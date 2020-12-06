@@ -165,7 +165,7 @@
 }  
 		\end{lstlisting}
 		
-		After the node exceeds its lifetime in seconds, before exiting will send a last message where the value of \texttt{alive} will be false.
+		After the node exceeds its lifetime in seconds, before exiting will send a last message where the value of \texttt{alive} will be \texttt{false}.
 		This signals the front-end that this node will not have to be displayed anymore.
 		
 		Each node has a unique \textit{UUID} that is generated in Python, using the \texttt{uuid}\cite{uuid}.
@@ -262,7 +262,7 @@
 	
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=\linewidth]{img/database.png}}
-			\caption{CoronaZ database structure.}
+			\caption{\hl{CoronaZ database structure.}}
 			\label{fig:database}
 		\end{figure}
 	
@@ -305,20 +305,33 @@
 	
 	\begin{itemize}
 		
-		\item \hl{\textit{unexpectedly shutting down the MongoDB database}:}
+		\item \textit{unexpectedly shutting down the MongoDB database}: when MongoDB fails, the user is presented with a loading \texttt{gif} in the front-end that communicates an error happened in the system.
+		The DB consumer will wait to send the messages until the database itself becomes reachable again;
 		
-		\item \hl{\textit{unexpectedly shutting down the consumer}:}
+		\item \textit{unexpectedly shutting down the DB consumer}: if the DB consumer goes offline Kafka will still hold the messages in the ``\textit{coronaz}'' queue until asked for them.
+		The database will not be updated until the consumer comes back up;
 		
-		\item \hl{\textit{unexpectedly shutting down the front end}:}
+		\item \textit{unexpectedly shutting down the back-end}: as per the database, if the back-end fails, a loading \texttt{gif} will be presented to the user in the front-end.
+		When it comes back up, it will serve the front-end again and the user will see the current map and simulation;
 		
-		\item \hl{\textit{unexpectedly shutting down the broker}:}
+		\item \textit{unexpectedly shutting down the broker}: this would make nodes not able to communicate with the rest of the system, they would only send messages among themselves. 
+		These messages will be stored in the nodes until the broker becomes available again.
+		When the broker comes back up again the messages will contain all the contacts that have been recorded by each node, but will not contain all the movements made.
+		The next message will contain the movement from the current position and the movements made in the downtime of the broker will be lost.
+		The movements are not essential since the exact movements are not relevant in a contact tracing application, the most important data comes from the contacts;
 		
-		\item \textit{adding more nodes}: when a node is added it will start communicating with the other nodes already in the system and it will start sending messages to the broker.
+		\item \textit{adding more nodes}: when a node is added it will start communicating with the other nodes already in the system and it will start sending messages to the broker;
+		
+		\item \textit{unexpectedly shutting down a node}: if a node shuts down unexpectedly, the last message with the ``\texttt{"alive": false}'' parameter will not be sent to the server.
+		This would cause the front-end to keep showing the node as a fixed point on the map.
+		The rest of the system will not be affected by a node shutting down.
 		
 	\end{itemize}
 
 	In general for the errors that can be felt in the front-end, such as the database not responding or the back-end server not responding, the user does not really need to know what exact component went down.
 	This is also for security reasons in case a \textit{malicious} user wants to find the vulnerabilities; without the specific logs it is harder for him to find the exact breaking point of the project.
+	
+	Also the user should also not know that there are various components behind that make up for the whole network, he just sees the system as one.
 	
 \section{Simulation}\label{sec:simulation}
 
@@ -332,7 +345,7 @@
 
 	The script will ask for the run parameters and will set them on the file, otherwise will run with a set of defaults.
 	The default parameters for the run are (in \textit{json} format):
-	\begin{lstlisting}
+	\begin{lstlisting}[language=json]
     {
         "field_width" : 100,
         "field_height" : 100,
