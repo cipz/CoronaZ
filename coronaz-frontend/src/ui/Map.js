@@ -22,8 +22,9 @@ export default function Map(props) {
     const width = props.width;
     const radius = props.radius;
     const node = props.node;
-
+    
     const scaleFactor = 5;
+    // const scaleFactor = props.scale;
 
     useEffect(() => {
         // Clear old content, duh...
@@ -71,11 +72,23 @@ export default function Map(props) {
                 .attr('height', 2 * radius * scaleFactor)
                 .attr("xlink:href", icon)
               } else {
+
                 svg.append("circle")
                 .attr("cx", value.position[0] * scaleFactor)
                 .attr("cy", value.position[1] * scaleFactor)
                 .attr("r", radius * scaleFactor)
                 .attr("fill", fill)
+                .style("stroke-dasharray", ("7,3"))
+                .style("stroke", fill)
+                .style("fill-opacity", .2)
+
+                svg.append("circle")
+                .attr("cx", value.position[0] * scaleFactor)
+                .attr("cy", value.position[1] * scaleFactor)
+                .attr("r", radius * scaleFactor * 0.5)
+                .attr("fill", fill)
+                .style("stroke", fill)
+                      
               }
             }
               
@@ -88,3 +101,4 @@ export default function Map(props) {
         </div>
     );
 };
+
