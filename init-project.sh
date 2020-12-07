@@ -66,7 +66,7 @@ then
         # cat tmp_config.json
 
         cp tmp_config.json coronaz-zombie/config.json
-        cp tmp_config.json coronaz-frontend/config.json
+        cp tmp_config.json coronaz-frontend/src/config.json
 
         rm tmp_config.json
 
