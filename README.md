@@ -15,7 +15,7 @@ Here is the architecture of the whole system.
 
 ![](coronaz.png)
 
-The programming task can be found in the [Programming Task](Programming Task.pdf) file.
+The programming task can be found in the [Programming Task](ProgrammingTask.pdf) file.
 A more complete description of the project can be found in the [essay.pdf](essay/essay.pdf) file and a video simulation can be found [here](https://youtu.be/RhMn2ERpSIQ).
 
 ## Instructions to start the project
