@@ -113,7 +113,7 @@
 		\item \textit{Programming language}: we chose Python because it is a fast programming language for creating prototypes. Also all group members are fluent with Python;
 		\item \textit{MQTT Broker}: we chose \textit{Apache Kafka} as broker for our project since it is one of the most used brokers in the market and it is has a large community that supports the project. Apache Kafka also handles well scaling and integration with other systems;
 		\item \textit{Containers}: we chose to use \textit{Docker} and \textit{docker-compose} given the easiness of constructing and spawning nodes. As explained in \ref{sec:architecture}, we have a \texttt{docker-compose.yml} that handles that base components such as the broker and the database;
-		\item \textit{Database}: we chose \textit{MongoDB} for its high scalability and ease of use. Additionally, its dynamic schemas would allows us to be very flexible with our data model;
+		\item \textit{Database}: we chose \textit{MongoDB} for its high scalability and ease of use. Additionally, its dynamic schemas would allow us to be very flexible with our data model;
 		\item \textit{Back-end}: we chose \textit{NodeJS} and \textit{Express}, as it is a popular back-end for web applications, and some group members had prior experience
 		\item \textit{Front-end}: we chose \textit{React} for its fast development speed and familiarity of some group members with it.
 	\end{itemize}
@@ -123,12 +123,12 @@
 		The system requirements for this project are simple:
 		\begin{itemize}
 			\item \textit{Docker} and \textit{docker-compose};
-			\item Ubuntu or another Linux system with \texttt{jq} installed for starting the project using the \textit{init-project.sh} bash script(partly working with \textit{git bash} on Windows);
+			\item Ubuntu or another Linux system with \texttt{jq} installed for starting the project using the \texttt{init-project.sh} bash script (partly working with \texttt{git bash} on Windows).
 		\end{itemize}
 
 \section{Architecture}\label{sec:architecture}
 	
-	We can divide our project in four major areas: \textit{nodes}, \textit{broker}, \textit{DB consumer}, \textit{database}, \textit{back-end} and \textit{front-end}.
+	We can divide our project in five major areas: \textit{nodes}, \textit{broker}, \textit{DB consumer}, \textit{database}, \textit{back-end} and \textit{front-end}.
 
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/coronaz.png}}
@@ -262,31 +262,34 @@
 	
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=\linewidth]{img/database.png}}
-			\caption{\hl{CoronaZ database structure.}}
+			\caption{CoronaZ database structure.}
 			\label{fig:database}
 		\end{figure}
 	
-		In the database, each document is map with the \texttt{UUID} of the nodes as a key and the value represents the latest update of the node(from the last message).
+		In the database, each document is mapped with the \texttt{UUID} of the nodes as a key and the value represents the latest update of the node(from the last message).
 	
 	\subsection{Back-end}
 	
-		For the back-end of the project, \textit{NodeJS} provides a single REST endpoint for the front-end. This is \textit{GET /data}, which connects to the MongoDB database and queries all the documents containing the state of the nodes.
+		For the back-end of the project, \textit{NodeJS} provides a single REST endpoint for the front-end. 
+		This is \textit{GET /data}, which connects to the MongoDB database and queries all the documents containing the state of the nodes.
 	
 	\subsection{Front-end}
 
 		The front-end of the project, built with \textit{React} and \textit{MaterialUI}, shows the evolution of the system and the simulations.
 		
-		A slider allows the user to select one of the queried states from the database, which will be then visualized on the map underneath. Moreover, this will also update the statistics on the top of the page. Realism mode switches between using circles or icons.
+		A slider allows the user to select one of the queried states from the database, which will be then visualized on the map underneath. 
+		Moreover, this will also update the statistics on the top of the page.
+		Realism mode switches between using circles or icons.
 		
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=\linewidth]{img/frontend.png}}
-			\caption{\hl{CoronaZ front-end.}}
+			\caption{CoronaZ front-end.}
 			\label{fig:front-end}
 		\end{figure}
 	
 		Safe nodes are colored in blue while infected nodes are red. Dead nodes are gray. 
 		
-		The statistics are the following: "Total nodes", "Zombies", "Deaths" and "Dead zombies" which respectively represent the total number of nodes, number of infected nodes, number of dead nodes and number of nodes that died infected.
+		The statistics are the following: ``Total nodes'', ``Zombies'', ``Deaths'' and ``Dead zombies'' which respectively represent the total number of nodes, number of infected nodes, number of dead nodes and number of nodes that died infected.
 		
 	
 \section{Docker networking}\label{sec:network}
@@ -333,7 +336,7 @@
 	
 \section{Simulation}\label{sec:simulation}
 
-	To start the project we have made a \textit{init-project.sh} script that asks the parameters with which the simulation will take place, then creates the docker network, executes the \texttt{docker-compose} (\texttt{up} and \texttt{down}) commands and manages (and spawns) the number of nodes.
+	To start the project we have made an \texttt{init-project.sh} script that asks the parameters with which the simulation will take place, executes the \texttt{docker-compose} (\texttt{up} and \texttt{down}) commands and manages the number of nodes by spawning as many as the user wants.
 	
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/script.png}}
@@ -376,7 +379,7 @@
 	\end{figure}
 	\begin{figure}[htbp]
 		\centerline{\includegraphics[width=\linewidth]{img/sim_3.png}}
-		\caption{CoronaZ simulation when nodes die(from natural causes).}
+		\caption{CoronaZ simulation when nodes die (from natural causes).}
 		\label{fig:sim_3}
 	\end{figure}
 
@@ -384,7 +387,7 @@
 
 	A ``\texttt{simulation.pcapng}'' file is present in the essay folder and contains part of a simulation for the system system running.
 
-	From this file, various message lengths can be seen, for example: the length in bytes of a message sent in broadcasted by each node is \textit{148B} (just the payload, \textit{189B} with headers).
+	From this file, various message lengths can be seen, for example: the length in bytes of a message sent in broadcast by each node is \textit{148B} (just the payload, \textit{189B} with headers).
 	For the messages sent to the the server by the nodes, the minimum size is \textit{148B} (\textit{189B} with headers), the rest depends on the number of contacts the node had.
 	
 	For a simulation with twenty nodes, each of them sends one message in broadcast a second, which means 189B.
@@ -425,17 +428,19 @@
 	
 		Currently the database only holds one simulation, but it can be expanded to hold multiple ones, preferably as different MongoDB collections.
 		
-		As MongoDB is very configurable one could also tweak factors such as replication.
+		As MongoDB is very configurable, one could also tweak factors such as replication.
 	
 	\subsection{Back-end}
 		
-		Currently the back-end only supports one end-point. An important improvement would be to allow the front-end to make intelligent queries, for example only sending the newest states instead of all of them to reduce bandwidth consumption. 
+		Currently the back-end only supports one end-point. 
+		An important improvement would be to allow the front-end to make intelligent queries, for example only sending the newest states, instead of all of them, to reduce bandwidth consumption. 
 		
 		Additionally, more complex functions such as selecting a specific simulation or user profiles can be implemented.
 	
 	\subsection{Front-end}
 	
-		The front-end is feature complete in terms of our project scope. A further improvement could be an option to select a specific simulation or having a user profile.
+		The front-end is feature complete in terms of our project scope.
+		A further improvement could be an option to select a specific simulation or having a user profile.
 	
 \section{Conclusions}\label{sec:conclusions}
 
