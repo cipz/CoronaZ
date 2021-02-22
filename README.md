@@ -1,6 +1,7 @@
 # CoronaZ: simulating a contact tracing application in a scalable environment
 
 This project was developed for the *Distributed Systems* course at the University of Helsinki in the accademic year 2020 - 2021.
+Pusblished in arXiv: [https://arxiv.org/abs/2102.09813](https://arxiv.org/abs/2102.09813).
 
 ## Introduction
 
